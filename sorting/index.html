@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorting Algorithms Guide</title>
+  <meta name="description" content="Learn sorting properly: stability, in-place, the O(n log n) bound, bubble/selection/insertion/merge/quick/heap/counting sort in C++, Java and JavaScript, built-in sorts and comparators, an animated visualizer, tips, and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Sorting&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#algorithms">Algorithms</a>
+        <a href="#visualizer">Visualizer</a>
+        <a href="#builtins">Built-ins</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="js">JavaScript</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Algorithms · Topic Guide</p>
+        <h1>Sorting</h1>
+        <p class="lead">Putting things in order is the most common preprocessing step in all of programming — and the gateway to
+          binary search, two pointers, greedy and more. Learn how the classic algorithms work, <em>why</em> O(n log n) is the
+          limit for comparison sorts, and how to use your language’s built-in sort correctly.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-sort" aria-hidden="true">
+        <div class="bars mini" id="heroBars"></div>
+        <p class="hero-bs-cap" id="heroCap">insertion sort</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Words you need to know</h3>
+          <ul class="checks">
+            <li><strong>Stable:</strong> equal elements keep their original relative order. Matters when you sort by one key after another.</li>
+            <li><strong>In-place:</strong> uses O(1) (or O(log n)) extra memory instead of a full copy.</li>
+            <li><strong>Comparison sort:</strong> only learns about the data by asking “is a &lt; b?”.</li>
+            <li><strong>Adaptive:</strong> runs faster when the input is already nearly sorted (insertion sort, TimSort).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Why O(n log n) is the floor</h3>
+          <p>There are <code>n!</code> possible orders of n items. Each comparison answers one yes/no question, so it can at best
+            halve the possibilities. You need at least <code>log₂(n!) ≈ n log₂ n</code> comparisons to single out the right order.</p>
+          <p class="muted small">Counting sort and radix sort beat this by <em>not comparing</em> — they use the values as array indices, which only works for small integer keys.</p>
+        </div>
+      </div>
+
+      <h3 class="sub">The algorithms at a glance</h3>
+      <div class="card table-card">
+        <table class="cmp-table">
+          <thead><tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Extra space</th><th>Stable?</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Bubble</strong></td><td class="good">O(n)</td><td class="bad">O(n²)</td><td class="bad">O(n²)</td><td class="good">O(1)</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Selection</strong></td><td class="bad">O(n²)</td><td class="bad">O(n²)</td><td class="bad">O(n²)</td><td class="good">O(1)</td><td class="bad">No</td></tr>
+            <tr><td><strong>Insertion</strong></td><td class="good">O(n)</td><td class="bad">O(n²)</td><td class="bad">O(n²)</td><td class="good">O(1)</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Merge</strong></td><td>O(n log n)</td><td>O(n log n)</td><td class="good">O(n log n)</td><td class="bad">O(n)</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Quick</strong></td><td>O(n log n)</td><td>O(n log n)</td><td class="bad">O(n²)</td><td>O(log n)</td><td class="bad">No</td></tr>
+            <tr><td><strong>Heap</strong></td><td>O(n log n)</td><td>O(n log n)</td><td class="good">O(n log n)</td><td class="good">O(1)</td><td class="bad">No</td></tr>
+            <tr><td><strong>Counting</strong></td><td>O(n + k)</td><td>O(n + k)</td><td>O(n + k)</td><td>O(n + k)</td><td class="good">Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <strong>What real libraries use:</strong> hybrids. C++ <code>std::sort</code> is <em>introsort</em> (quick sort that switches to heap sort if recursion gets too deep, and insertion sort for tiny ranges).
+        Java and JavaScript (V8) use <em>TimSort</em> for objects — merge sort + insertion sort that exploits already-sorted runs.
+      </div>
+    </section>
+
+    <!-- ALGORITHMS -->
+    <section id="algorithms" class="section">
+      <h2><span class="num">02</span> The classic algorithms</h2>
+      <p class="lead small-lead">Learn the idea in one sentence first, then the code. Watch each one run in the <a href="#visualizer">visualizer</a>.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Bubble sort</h3>
+          <p>Repeatedly swap adjacent out-of-order pairs; the largest value “bubbles” to the end each pass. Stop early if a pass makes no swaps.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void bubbleSort(vector&lt;int&gt;&amp; a) {
+    int n = a.size();
+    for (int i = 0; i &lt; n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j &lt; n - 1 - i; j++)
+            if (a[j] &gt; a[j + 1]) { swap(a[j], a[j + 1]); swapped = true; }
+        if (!swapped) break;              // already sorted
+    }
+}</code></pre>
+<pre data-lang="java"><code>void bubbleSort(int[] a) {
+    int n = a.length;
+    for (int i = 0; i &lt; n - 1; i++) {
+        boolean swapped = false;
+        for (int j = 0; j &lt; n - 1 - i; j++)
+            if (a[j] &gt; a[j + 1]) {
+                int t = a[j]; a[j] = a[j + 1]; a[j + 1] = t;
+                swapped = true;
+            }
+        if (!swapped) break;              // already sorted
+    }
+}</code></pre>
+<pre data-lang="js"><code>function bubbleSort(a) {
+    const n = a.length;
+    for (let i = 0; i &lt; n - 1; i++) {
+        let swapped = false;
+        for (let j = 0; j &lt; n - 1 - i; j++)
+            if (a[j] &gt; a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]]; swapped = true; }
+        if (!swapped) break;              // already sorted
+    }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Selection sort</h3>
+          <p>Find the minimum of the unsorted part and swap it to the front. Few swaps (≤ n), but always O(n²) comparisons — and not stable.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void selectionSort(vector&lt;int&gt;&amp; a) {
+    int n = a.size();
+    for (int i = 0; i &lt; n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j &lt; n; j++)
+            if (a[j] &lt; a[m]) m = j;
+        swap(a[i], a[m]);
+    }
+}</code></pre>
+<pre data-lang="java"><code>void selectionSort(int[] a) {
+    int n = a.length;
+    for (int i = 0; i &lt; n - 1; i++) {
+        int m = i;
+        for (int j = i + 1; j &lt; n; j++)
+            if (a[j] &lt; a[m]) m = j;
+        int t = a[i]; a[i] = a[m]; a[m] = t;
+    }
+}</code></pre>
+<pre data-lang="js"><code>function selectionSort(a) {
+    const n = a.length;
+    for (let i = 0; i &lt; n - 1; i++) {
+        let m = i;
+        for (let j = i + 1; j &lt; n; j++)
+            if (a[j] &lt; a[m]) m = j;
+        [a[i], a[m]] = [a[m], a[i]];
+    }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Insertion sort</h3>
+          <p>Like sorting playing cards in your hand: take the next card and shift bigger ones right until it fits. Very fast on small or nearly-sorted input.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void insertionSort(vector&lt;int&gt;&amp; a) {
+    for (int i = 1; i &lt; a.size(); i++) {
+        int key = a[i], j = i - 1;
+        while (j &gt;= 0 &amp;&amp; a[j] &gt; key) { a[j + 1] = a[j]; j--; }   // shift right
+        a[j + 1] = key;
+    }
+}</code></pre>
+<pre data-lang="java"><code>void insertionSort(int[] a) {
+    for (int i = 1; i &lt; a.length; i++) {
+        int key = a[i], j = i - 1;
+        while (j &gt;= 0 &amp;&amp; a[j] &gt; key) { a[j + 1] = a[j]; j--; }   // shift right
+        a[j + 1] = key;
+    }
+}</code></pre>
+<pre data-lang="js"><code>function insertionSort(a) {
+    for (let i = 1; i &lt; a.length; i++) {
+        const key = a[i];
+        let j = i - 1;
+        while (j &gt;= 0 &amp;&amp; a[j] &gt; key) { a[j + 1] = a[j]; j--; }   // shift right
+        a[j + 1] = key;
+    }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Merge sort</h3>
+          <p>Divide in half, sort each half recursively, merge the two sorted halves. Always O(n log n) and stable, at the cost of O(n) extra memory.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void mergeSort(vector&lt;int&gt;&amp; a, int lo, int hi, vector&lt;int&gt;&amp; tmp) {   // sorts [lo, hi)
+    if (hi - lo &lt; 2) return;
+    int mid = (lo + hi) / 2;
+    mergeSort(a, lo, mid, tmp);
+    mergeSort(a, mid, hi, tmp);
+    int i = lo, j = mid, k = lo;
+    while (i &lt; mid &amp;&amp; j &lt; hi) tmp[k++] = (a[i] &lt;= a[j]) ? a[i++] : a[j++];  // &lt;= keeps it stable
+    while (i &lt; mid) tmp[k++] = a[i++];
+    while (j &lt; hi) tmp[k++] = a[j++];
+    for (k = lo; k &lt; hi; k++) a[k] = tmp[k];
+}
+// call: vector&lt;int&gt; tmp(a.size()); mergeSort(a, 0, a.size(), tmp);</code></pre>
+<pre data-lang="java"><code>void mergeSort(int[] a, int lo, int hi, int[] tmp) {   // sorts [lo, hi)
+    if (hi - lo &lt; 2) return;
+    int mid = (lo + hi) / 2;
+    mergeSort(a, lo, mid, tmp);
+    mergeSort(a, mid, hi, tmp);
+    int i = lo, j = mid, k = lo;
+    while (i &lt; mid &amp;&amp; j &lt; hi) tmp[k++] = (a[i] &lt;= a[j]) ? a[i++] : a[j++];  // &lt;= keeps it stable
+    while (i &lt; mid) tmp[k++] = a[i++];
+    while (j &lt; hi) tmp[k++] = a[j++];
+    for (k = lo; k &lt; hi; k++) a[k] = tmp[k];
+}
+// call: mergeSort(a, 0, a.length, new int[a.length]);</code></pre>
+<pre data-lang="js"><code>function mergeSort(a) {
+    if (a.length &lt; 2) return a;
+    const mid = a.length &gt;&gt; 1;
+    const left = mergeSort(a.slice(0, mid)), right = mergeSort(a.slice(mid));
+    const out = [];
+    let i = 0, j = 0;
+    while (i &lt; left.length &amp;&amp; j &lt; right.length)
+        out.push(left[i] &lt;= right[j] ? left[i++] : right[j++]);   // &lt;= keeps it stable
+    while (i &lt; left.length) out.push(left[i++]);
+    while (j &lt; right.length) out.push(right[j++]);
+    return out;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Quick sort</h3>
+          <p>Pick a pivot, partition so smaller values go left and larger go right, recurse on both sides. Fastest in practice;
+            a <strong>random pivot</strong> makes the O(n²) worst case (e.g. already-sorted input) vanishingly unlikely.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void quickSort(vector&lt;int&gt;&amp; a, int lo, int hi) {         // sorts [lo, hi]
+    if (lo &gt;= hi) return;
+    swap(a[lo + rand() % (hi - lo + 1)], a[hi]);          // random pivot to the end
+    int p = a[hi], i = lo;
+    for (int j = lo; j &lt; hi; j++)                          // Lomuto partition
+        if (a[j] &lt; p) swap(a[i++], a[j]);
+    swap(a[i], a[hi]);                                     // pivot to its final spot
+    quickSort(a, lo, i - 1);
+    quickSort(a, i + 1, hi);
+}</code></pre>
+<pre data-lang="java"><code>void quickSort(int[] a, int lo, int hi) {                   // sorts [lo, hi]
+    if (lo &gt;= hi) return;
+    swap(a, lo + (int) (Math.random() * (hi - lo + 1)), hi); // random pivot to the end
+    int p = a[hi], i = lo;
+    for (int j = lo; j &lt; hi; j++)                            // Lomuto partition
+        if (a[j] &lt; p) swap(a, i++, j);
+    swap(a, i, hi);                                          // pivot to its final spot
+    quickSort(a, lo, i - 1);
+    quickSort(a, i + 1, hi);
+}
+void swap(int[] a, int i, int j) { int t = a[i]; a[i] = a[j]; a[j] = t; }</code></pre>
+<pre data-lang="js"><code>function quickSort(a, lo = 0, hi = a.length - 1) {          // sorts [lo, hi]
+    if (lo &gt;= hi) return;
+    const r = lo + Math.floor(Math.random() * (hi - lo + 1));
+    [a[r], a[hi]] = [a[hi], a[r]];                           // random pivot to the end
+    const p = a[hi];
+    let i = lo;
+    for (let j = lo; j &lt; hi; j++)                            // Lomuto partition
+        if (a[j] &lt; p) { [a[i], a[j]] = [a[j], a[i]]; i++; }
+    [a[i], a[hi]] = [a[hi], a[i]];                           // pivot to its final spot
+    quickSort(a, lo, i - 1);
+    quickSort(a, i + 1, hi);
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Heap sort</h3>
+          <p>Turn the array into a max-heap, then repeatedly swap the max to the end and repair the heap. Guaranteed O(n log n) and in place — but not stable.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void siftDown(vector&lt;int&gt;&amp; a, int i, int n) {
+    while (2 * i + 1 &lt; n) {
+        int c = 2 * i + 1;                                  // left child
+        if (c + 1 &lt; n &amp;&amp; a[c + 1] &gt; a[c]) c++;              // bigger child
+        if (a[i] &gt;= a[c]) break;
+        swap(a[i], a[c]); i = c;
+    }
+}
+void heapSort(vector&lt;int&gt;&amp; a) {
+    int n = a.size();
+    for (int i = n / 2 - 1; i &gt;= 0; i--) siftDown(a, i, n);   // build heap: O(n)
+    for (int end = n - 1; end &gt; 0; end--) {
+        swap(a[0], a[end]);                                 // max to the end
+        siftDown(a, 0, end);
+    }
+}</code></pre>
+<pre data-lang="java"><code>void siftDown(int[] a, int i, int n) {
+    while (2 * i + 1 &lt; n) {
+        int c = 2 * i + 1;                                  // left child
+        if (c + 1 &lt; n &amp;&amp; a[c + 1] &gt; a[c]) c++;              // bigger child
+        if (a[i] &gt;= a[c]) break;
+        int t = a[i]; a[i] = a[c]; a[c] = t; i = c;
+    }
+}
+void heapSort(int[] a) {
+    int n = a.length;
+    for (int i = n / 2 - 1; i &gt;= 0; i--) siftDown(a, i, n);   // build heap: O(n)
+    for (int end = n - 1; end &gt; 0; end--) {
+        int t = a[0]; a[0] = a[end]; a[end] = t;            // max to the end
+        siftDown(a, 0, end);
+    }
+}</code></pre>
+<pre data-lang="js"><code>function siftDown(a, i, n) {
+    while (2 * i + 1 &lt; n) {
+        let c = 2 * i + 1;                                  // left child
+        if (c + 1 &lt; n &amp;&amp; a[c + 1] &gt; a[c]) c++;              // bigger child
+        if (a[i] &gt;= a[c]) break;
+        [a[i], a[c]] = [a[c], a[i]]; i = c;
+    }
+}
+function heapSort(a) {
+    const n = a.length;
+    for (let i = (n &gt;&gt; 1) - 1; i &gt;= 0; i--) siftDown(a, i, n);   // build heap: O(n)
+    for (let end = n - 1; end &gt; 0; end--) {
+        [a[0], a[end]] = [a[end], a[0]];                    // max to the end
+        siftDown(a, 0, end);
+    }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Counting sort</h3>
+          <p>For small integer ranges: count how many times each value appears, then write them back in order. No comparisons at all — O(n + k) for values in <code>[0, k)</code>.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void countingSort(vector&lt;int&gt;&amp; a, int k) {        // values in [0, k)
+    vector&lt;int&gt; cnt(k, 0);
+    for (int x : a) cnt[x]++;
+    int i = 0;
+    for (int v = 0; v &lt; k; v++)
+        while (cnt[v]--) a[i++] = v;
+}</code></pre>
+<pre data-lang="java"><code>void countingSort(int[] a, int k) {               // values in [0, k)
+    int[] cnt = new int[k];
+    for (int x : a) cnt[x]++;
+    int i = 0;
+    for (int v = 0; v &lt; k; v++)
+        while (cnt[v]-- &gt; 0) a[i++] = v;
+}</code></pre>
+<pre data-lang="js"><code>function countingSort(a, k) {                     // values in [0, k)
+    const cnt = new Array(k).fill(0);
+    for (const x of a) cnt[x]++;
+    let i = 0;
+    for (let v = 0; v &lt; k; v++)
+        while (cnt[v]-- &gt; 0) a[i++] = v;
+}</code></pre>
+          </div>
+          <p class="muted small"><strong>Radix sort</strong> applies a stable counting sort digit by digit (least significant first) — O(d·(n + 10)) for d-digit numbers.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZER -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">03</span> Interactive visualizers</h2>
+
+      <h3 class="sub">A · Watch them sort</h3>
+      <div class="viz card">
+        <div class="viz-buttons" id="algoButtons">
+          <button data-algo="bubble" class="active">Bubble</button>
+          <button data-algo="selection">Selection</button>
+          <button data-algo="insertion">Insertion</button>
+          <button data-algo="merge">Merge</button>
+          <button data-algo="quick">Quick</button>
+          <button data-algo="heap">Heap</button>
+        </div>
+        <div class="viz-controls">
+          <label>Size <input type="number" id="sortSize" min="5" max="60" value="24"></label>
+          <label>Input
+            <select id="sortInput">
+              <option value="random" selected>Random</option>
+              <option value="nearly">Nearly sorted</option>
+              <option value="reversed">Reversed</option>
+              <option value="few">Few unique values</option>
+            </select>
+          </label>
+          <label>Speed
+            <select id="sortSpeed">
+              <option value="160">Slow</option>
+              <option value="60" selected>Normal</option>
+              <option value="12">Fast</option>
+            </select>
+          </label>
+        </div>
+        <div class="viz-buttons">
+          <button id="sortRun" class="active">Sort ▶</button>
+          <button id="sortShuffle" class="op">New array</button>
+          <button id="sortAll" class="op">Compare all on this array</button>
+        </div>
+        <div class="bars" id="sortBars"></div>
+        <div class="sort-stats">
+          <span>comparisons <b id="statCmp">0</b></span>
+          <span>writes/swaps <b id="statWr">0</b></span>
+          <span class="legend-inline"><i class="sw cmp"></i>comparing <i class="sw wr"></i>writing <i class="sw done"></i>in final place</span>
+        </div>
+        <div class="bs-status" id="sortStatus">Pick an algorithm and press Sort.</div>
+        <div id="sortTable"></div>
+      </div>
+
+      <h3 class="sub">B · Stable vs unstable</h3>
+      <p>Each card has a number and a colour. Equal numbers start in the order <span class="tagc t0">a</span> → <span class="tagc t1">b</span> → <span class="tagc t2">c</span>.
+        A <strong>stable</strong> sort keeps that order; an unstable one may scramble it.</p>
+      <div class="viz card">
+        <div class="stab-rows" id="stabRows"></div>
+        <div class="viz-buttons"><button id="stabShuffle" class="op">New cards</button></div>
+      </div>
+    </section>
+
+    <!-- BUILT-INS -->
+    <section id="builtins" class="section">
+      <h2><span class="num">04</span> Built-in sorts &amp; comparators</h2>
+      <p class="lead small-lead">In interviews you’ll almost always call the library sort. Know its guarantees and how to write a comparator.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Sorting numbers</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>#include &lt;algorithm&gt;
+vector&lt;int&gt; a = {5, 1, 4};
+sort(a.begin(), a.end());                    // ascending, introsort, NOT stable
+sort(a.begin(), a.end(), greater&lt;int&gt;());    // descending
+stable_sort(a.begin(), a.end());             // stable (merge sort)
+int arr[] = {3, 2, 1};
+sort(arr, arr + 3);                          // plain arrays too</code></pre>
+<pre data-lang="java"><code>import java.util.*;
+int[] a = {5, 1, 4};
+Arrays.sort(a);                              // primitives: dual-pivot quicksort
+Integer[] b = {5, 1, 4};
+Arrays.sort(b, Collections.reverseOrder());  // descending needs boxed Integer[]
+List&lt;Integer&gt; list = new ArrayList&lt;&gt;(List.of(5, 1, 4));
+Collections.sort(list);                      // objects: TimSort, stable</code></pre>
+<pre data-lang="js"><code>const a = [10, 9, 1, 100];
+a.sort();                    // ⚠ [1, 10, 100, 9] — compares as STRINGS!
+a.sort((x, y) =&gt; x - y);     // ✔ ascending numbers
+a.sort((x, y) =&gt; y - x);     // ✔ descending
+const sorted = a.toSorted((x, y) =&gt; x - y);   // ES2023: returns a copy
+// Array.prototype.sort is stable (guaranteed since ES2019)</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Custom comparators &amp; multiple keys</h3>
+          <p>Sort people by age ascending, then by name for equal ages.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>struct Person { string name; int age; };
+sort(people.begin(), people.end(), [](const Person&amp; a, const Person&amp; b) {
+    if (a.age != b.age) return a.age &lt; b.age;    // must be a strict "less than"
+    return a.name &lt; b.name;
+});
+// or: tie(a.age, a.name) &lt; tie(b.age, b.name)</code></pre>
+<pre data-lang="java"><code>record Person(String name, int age) {}
+people.sort(Comparator.comparingInt(Person::age)
+                      .thenComparing(Person::name));
+// by hand: (a, b) -&gt; a.age() != b.age() ? Integer.compare(a.age(), b.age())
+//                                       : a.name().compareTo(b.name())</code></pre>
+<pre data-lang="js"><code>people.sort((a, b) =&gt;
+    a.age - b.age ||                     // numbers: subtract
+    a.name.localeCompare(b.name)         // strings: localeCompare
+);
+// comparator returns &lt; 0 (a first), 0 (keep order), &gt; 0 (b first)</code></pre>
+          </div>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Comparator rules:</strong> it must be <em>consistent</em> — if a &lt; b and b &lt; c then a &lt; c, and never “a &lt; a”.
+        In C++ returning <code>&lt;=</code> instead of <code>&lt;</code> is undefined behaviour and can crash <code>std::sort</code>.
+        In Java, prefer <code>Integer.compare(a, b)</code> over <code>a - b</code>, which can overflow.
+      </div>
+    </section>
+
+    <!-- PATTERNS -->
+    <section id="patterns" class="section">
+      <h2><span class="num">05</span> Sorting patterns in problems</h2>
+
+      <div class="tips three">
+        <div class="tip card"><div class="tip-ico">👉👈</div><h3>Sort + two pointers</h3>
+          <p>Sorting unlocks pair/triplet search from both ends: two-sum on sorted data, 3Sum, boats, closest pair. O(n log n) total.</p></div>
+        <div class="tip card"><div class="tip-ico">📅</div><h3>Sort by a key, then sweep</h3>
+          <p>Intervals by start or end, events by time, people by height. After sorting, one linear pass usually finishes the job.</p></div>
+        <div class="tip card"><div class="tip-ico">🎯</div><h3>Quickselect for k-th</h3>
+          <p>Need only the k-th smallest/largest? Partition like quick sort but recurse into <em>one</em> side: average O(n).</p></div>
+        <div class="tip card"><div class="tip-ico">🪣</div><h3>Counting / bucket sort</h3>
+          <p>Small value range or frequencies (top-k frequent, sort colors, max gap) → count instead of compare: O(n).</p></div>
+        <div class="tip card"><div class="tip-ico">🔀</div><h3>Merge sort + counting</h3>
+          <p>Inversions, reverse pairs, “smaller numbers after self”: count cross pairs while merging two sorted halves.</p></div>
+        <div class="tip card"><div class="tip-ico">🧩</div><h3>Custom order</h3>
+          <p>Largest number, relative sort, sort by frequency: the trick is entirely in the comparator.</p></div>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">06</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🃏</div><h3>Act them out</h3>
+          <p>Sort 8 playing cards by hand with each algorithm. Insertion and selection become obvious in two minutes.</p></div>
+        <div class="tip card"><div class="tip-ico">📏</div><h3>Learn by invariant</h3>
+          <p>Insertion: “prefix is sorted”. Selection: “prefix holds the smallest i items”. Quick: “left &lt; pivot ≤ right”.</p></div>
+        <div class="tip card"><div class="tip-ico">✍️</div><h3>Write merge &amp; partition from memory</h3>
+          <p>They’re the two building blocks behind half of all sorting interview questions.</p></div>
+        <div class="tip card"><div class="tip-ico">⚖️</div><h3>Stability matters for multi-key</h3>
+          <p>Sort by secondary key first, then stable-sort by primary key — or just use a two-key comparator.</p></div>
+        <div class="tip card"><div class="tip-ico">🎲</div><h3>Randomise the pivot</h3>
+          <p>A fixed first/last pivot is O(n²) on sorted input — the most common real-world input!</p></div>
+        <div class="tip card"><div class="tip-ico">🐣</div><h3>Small n? Insertion sort</h3>
+          <p>For n ≤ ~16 it beats everything; that’s why library sorts switch to it for tiny subarrays.</p></div>
+        <div class="tip card"><div class="tip-ico">⚠️</div><h3>JS: always pass a comparator</h3>
+          <p><code>[10, 9, 1].sort()</code> gives <code>[1, 10, 9]</code>. For numbers use <code>(a, b) =&gt; a - b</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">🧮</div><h3>Do you even need to sort?</h3>
+          <p>Top-k → heap or quickselect. Duplicates → hash set. Min/max → one pass. Sorting is O(n log n); these are O(n).</p></div>
+        <div class="tip card"><div class="tip-ico">📦</div><h3>Sort indices, not data</h3>
+          <p>When you need original positions later, sort an index array by <code>a[i]</code> instead of moving values.</p></div>
+        <div class="tip card"><div class="tip-ico">🧪</div><h3>Test the nasty inputs</h3>
+          <p>Empty, one element, all equal, already sorted, reversed, and duplicates. They break naive quick sorts.</p></div>
+        <div class="tip card"><div class="tip-ico">🔢</div><h3>Count the operations</h3>
+          <p>Use the “Compare all” button above: see why O(n²) vs O(n log n) matters even at n = 60.</p></div>
+        <div class="tip card"><div class="tip-ico">🗣️</div><h3>Name the trade-off</h3>
+          <p>Merge: stable, O(n) memory. Quick: fastest, worst case O(n²). Heap: guaranteed, not stable. Interviewers love this.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>JavaScript <code>sort()</code> without a comparator on numbers.</li>
+            <li>Comparator that isn’t a strict ordering (<code>&lt;=</code> in C++).</li>
+            <li><code>a - b</code> comparator overflowing in Java with large values.</li>
+            <li>Quick sort with a fixed pivot on sorted / all-equal input.</li>
+            <li>Merge with <code>&lt;</code> instead of <code>&lt;=</code> → loses stability.</li>
+            <li>Off-by-one between <code>[lo, hi]</code> and <code>[lo, hi)</code> ranges in recursion.</li>
+            <li>Sorting when a hash set, heap or single pass would do.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> bubble, selection, insertion from memory; trace on paper.</li>
+            <li><strong>Day 2:</strong> merge sort + merge sorted array, squares of sorted array.</li>
+            <li><strong>Day 3:</strong> quick sort (random pivot) + sort array by parity, sort colors.</li>
+            <li><strong>Day 4:</strong> heap sort, counting sort; height checker, relative sort.</li>
+            <li><strong>Day 5:</strong> built-in sort + comparators: largest number, frequency sort.</li>
+            <li><strong>Day 6:</strong> anagram, contains duplicate, H-index.</li>
+            <li><strong>Day 7:</strong> kth largest (quickselect), top-k frequent (buckets).</li>
+            <li><strong>Day 8:</strong> 3Sum, insertion sort list.</li>
+            <li><strong>Day 9:</strong> count inversions, reverse pairs.</li>
+            <li><strong>Day 10:</strong> count smaller after self, maximum gap; redo mistakes.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">07</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">08</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Know the trade-offs, randomise the pivot, and always pass a comparator in JavaScript.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

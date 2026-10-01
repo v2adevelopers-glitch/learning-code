@@ -18,6 +18,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Stacks & Queues](stack-queue/index.html) — LIFO vs FIFO, deques and ring buffers, built-ins and
   implementations, monotonic stack/deque and BFS patterns, visualizers (push/pop/enqueue/dequeue,
   balanced brackets, next greater element), tips & tricks, 20 important questions and a quiz.
+- [Sorting](sorting/index.html) — stability, in-place, the O(n log n) lower bound, bubble/selection/
+  insertion/merge/quick/heap/counting sort, built-in sorts and comparators, an animated bar-chart
+  visualizer with an operation-count comparison, a stability demo, tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.
