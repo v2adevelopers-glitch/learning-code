@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stack &amp; Queue Guide</title>
+  <meta name="description" content="Learn stacks and queues properly: LIFO vs FIFO, deques, built-ins in C++/Java/JavaScript, implementations, monotonic stacks and deques, BFS, interactive visualizers, tips, and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Stack&nbsp;&amp;&nbsp;Queue&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#builtins">In code</a>
+        <a href="#visualizer">Visualizers</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="js">JavaScript</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures · Topic Guide</p>
+        <h1>Stacks &amp; Queues</h1>
+        <p class="lead">Two of the simplest data structures — and two of the most useful. A <strong>stack</strong> remembers
+          what you need to come back to; a <strong>queue</strong> processes things in the order they arrived.
+          Learn when to reach for each, and the <em>monotonic</em> tricks that turn O(n²) problems into O(n).</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-sq" aria-hidden="true">
+        <div class="hero-sq-cols">
+          <div><div class="sq-stack mini" id="heroStack"></div><p class="sq-cap">stack · LIFO</p></div>
+          <div><div class="sq-queue mini" id="heroQueue"></div><p class="sq-cap">queue · FIFO</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Stack — Last In, First Out</h3>
+          <p>Like a pile of plates: you add to the <strong>top</strong> and take from the <strong>top</strong>.
+            The last thing pushed is the first thing popped.</p>
+          <ul class="checks">
+            <li><code>push(x)</code> — put x on top · <strong>O(1)</strong></li>
+            <li><code>pop()</code> — remove the top · <strong>O(1)</strong></li>
+            <li><code>peek()/top()</code> — look at the top without removing · <strong>O(1)</strong></li>
+          </ul>
+          <p class="muted small">Used for: undo/redo, the function call stack, browser “back”, matching brackets, DFS, expression evaluation.</p>
+        </div>
+        <div class="card">
+          <h3>Queue — First In, First Out</h3>
+          <p>Like a line at a ticket counter: join at the <strong>back</strong>, leave from the <strong>front</strong>.
+            The first thing in is the first thing out.</p>
+          <ul class="checks">
+            <li><code>enqueue(x)/offer(x)</code> — add at the back · <strong>O(1)</strong></li>
+            <li><code>dequeue()/poll()</code> — remove from the front · <strong>O(1)</strong></li>
+            <li><code>front()/peek()</code> — look at the front · <strong>O(1)</strong></li>
+          </ul>
+          <p class="muted small">Used for: BFS, task scheduling, printer jobs, message buffers, rate limiting, streaming data.</p>
+        </div>
+      </div>
+
+      <h3 class="sub">The family</h3>
+      <div class="card table-card">
+        <table class="cmp-table">
+          <thead><tr><th>Structure</th><th>Add</th><th>Remove</th><th>Typical use</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Stack</strong></td><td>top</td><td>top</td><td>Matching, undo, DFS, monotonic stack</td></tr>
+            <tr><td><strong>Queue</strong></td><td>back</td><td>front</td><td>BFS, scheduling, buffers</td></tr>
+            <tr><td><strong>Deque</strong> (double-ended)</td><td>front or back</td><td>front or back</td><td>Sliding window max/min, can act as both</td></tr>
+            <tr><td><strong>Circular queue</strong></td><td>back (wraps around)</td><td>front</td><td>Fixed-size buffers, streams</td></tr>
+            <tr><td><strong>Priority queue</strong> (heap)</td><td>anywhere</td><td>smallest/largest first</td><td>Dijkstra, top-k, scheduling by priority</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BUILT-INS -->
+    <section id="builtins" class="section">
+      <h2><span class="num">02</span> Stacks &amp; queues in code</h2>
+      <p class="lead small-lead">Use the library in interviews — but know how to build them, because “implement X using Y” questions are common.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Built-in stack</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>#include &lt;stack&gt;
+stack&lt;int&gt; st;
+st.push(1); st.push(2);
+int top = st.top();     // 2  (top() reads, pop() returns void!)
+st.pop();
+bool empty = st.empty();
+// vector&lt;int&gt; with push_back / back / pop_back works too</code></pre>
+<pre data-lang="java"><code>import java.util.ArrayDeque;
+import java.util.Deque;
+Deque&lt;Integer&gt; st = new ArrayDeque&lt;&gt;();   // prefer over legacy Stack class
+st.push(1); st.push(2);
+int top = st.peek();    // 2
+st.pop();               // returns 2
+boolean empty = st.isEmpty();</code></pre>
+<pre data-lang="js"><code>const st = [];          // a plain array is a perfect stack
+st.push(1); st.push(2);
+const top = st[st.length - 1];   // 2  (or st.at(-1))
+st.pop();               // returns 2, O(1)
+const empty = st.length === 0;</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Built-in queue / deque</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>#include &lt;queue&gt;
+queue&lt;int&gt; q;
+q.push(1); q.push(2);
+int front = q.front();  // 1
+q.pop();
+
+deque&lt;int&gt; dq;          // both ends: push_front/back, pop_front/back
+dq.push_back(3); dq.push_front(0);</code></pre>
+<pre data-lang="java"><code>Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+q.offer(1); q.offer(2);
+int front = q.peek();   // 1
+q.poll();               // returns 1 (null if empty)
+
+Deque&lt;Integer&gt; dq = new ArrayDeque&lt;&gt;();
+dq.offerLast(3); dq.offerFirst(0);   // also pollFirst/pollLast</code></pre>
+<pre data-lang="js"><code>// JS has no built-in queue. array.shift() is O(n) — it moves every element!
+// For BFS-style loops, keep a head index instead:
+const q = [1, 2];
+let head = 0;
+while (head &lt; q.length) {
+    const x = q[head++];      // O(1) dequeue
+    // ... q.push(next) to enqueue
+}
+// Need a reusable queue? See the circular queue below.</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Implement a stack with an array</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>class ArrayStack {
+    vector&lt;int&gt; a;
+public:
+    void push(int x) { a.push_back(x); }
+    int pop() { int x = a.back(); a.pop_back(); return x; }
+    int peek() { return a.back(); }
+    bool empty() { return a.empty(); }
+};</code></pre>
+<pre data-lang="java"><code>class ArrayStack {
+    private int[] a = new int[8];
+    private int size = 0;
+    void push(int x) {
+        if (size == a.length) a = Arrays.copyOf(a, size * 2);   // grow
+        a[size++] = x;
+    }
+    int pop() { return a[--size]; }
+    int peek() { return a[size - 1]; }
+    boolean isEmpty() { return size == 0; }
+}</code></pre>
+<pre data-lang="js"><code>class ArrayStack {
+    constructor() { this.a = []; }
+    push(x) { this.a.push(x); }
+    pop() { return this.a.pop(); }
+    peek() { return this.a[this.a.length - 1]; }
+    isEmpty() { return this.a.length === 0; }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Circular queue (ring buffer)</h3>
+          <p>A fixed array plus a <code>head</code> index and a <code>size</code>. The tail position is
+            <code>(head + size) % cap</code> — indices wrap around instead of shifting elements.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>class RingQueue {
+    vector&lt;int&gt; a; int head = 0, size = 0;
+public:
+    RingQueue(int cap) : a(cap) {}
+    bool enqueue(int x) {
+        if (size == a.size()) return false;          // full
+        a[(head + size) % a.size()] = x; size++;
+        return true;
+    }
+    int dequeue() {                                  // assumes not empty
+        int x = a[head];
+        head = (head + 1) % a.size(); size--;
+        return x;
+    }
+};</code></pre>
+<pre data-lang="java"><code>class RingQueue {
+    private final int[] a; private int head = 0, size = 0;
+    RingQueue(int cap) { a = new int[cap]; }
+    boolean enqueue(int x) {
+        if (size == a.length) return false;          // full
+        a[(head + size) % a.length] = x; size++;
+        return true;
+    }
+    int dequeue() {                                  // assumes not empty
+        int x = a[head];
+        head = (head + 1) % a.length; size--;
+        return x;
+    }
+}</code></pre>
+<pre data-lang="js"><code>class RingQueue {
+    constructor(cap) { this.a = new Array(cap); this.head = 0; this.size = 0; }
+    enqueue(x) {
+        if (this.size === this.a.length) return false;   // full
+        this.a[(this.head + this.size) % this.a.length] = x;
+        this.size++;
+        return true;
+    }
+    dequeue() {                                         // assumes not empty
+        const x = this.a[this.head];
+        this.head = (this.head + 1) % this.a.length;
+        this.size--;
+        return x;
+    }
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZERS -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">03</span> Interactive visualizers</h2>
+
+      <h3 class="sub">A · Push, pop, enqueue, dequeue</h3>
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Value <input type="number" id="sqVal" value="7"></label>
+        </div>
+        <div class="sq-play">
+          <div>
+            <div class="viz-buttons">
+              <button data-sop="push">push</button>
+              <button data-sop="pop">pop</button>
+              <button data-sop="peek">peek</button>
+            </div>
+            <div class="sq-stack" id="vStack"></div>
+            <p class="sq-cap">Stack — top is at the top</p>
+          </div>
+          <div>
+            <div class="viz-buttons">
+              <button data-qop="enqueue">enqueue</button>
+              <button data-qop="dequeue">dequeue</button>
+              <button data-qop="front">front</button>
+            </div>
+            <div class="sq-queue" id="vQueue"></div>
+            <p class="sq-cap">Queue — leaves from the front (left), joins at the back (right)</p>
+          </div>
+        </div>
+        <div class="bs-status" id="sqStatus">Try the buttons. Both start with the same three values pushed in the same order.</div>
+      </div>
+
+      <h3 class="sub">B · Balanced brackets with a stack</h3>
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Expression <input type="text" id="brInput" class="wide" value="{[()()]}("></label>
+        </div>
+        <div class="viz-buttons">
+          <button id="brRun" class="active">Check ▶</button>
+          <span class="divider"></span>
+          <button class="op" data-br="([]{})">([]{})</button>
+          <button class="op" data-br="([)]">([)]</button>
+          <button class="op" data-br="((a+b)*[c-d])">((a+b)*[c-d])</button>
+          <button class="op" data-br="))(">))(</button>
+        </div>
+        <div class="br-row">
+          <div class="br-chars" id="brChars"></div>
+          <div><div class="sq-stack small" id="brStack"></div><p class="sq-cap">stack</p></div>
+        </div>
+        <div class="bs-status" id="brStatus">Press Check to scan the expression.</div>
+      </div>
+
+      <h3 class="sub">C · Next greater element with a monotonic stack</h3>
+      <div class="viz card">
+        <div class="viz-buttons">
+          <button id="ngRun" class="active">Run ▶</button>
+          <button id="ngNew" class="op">New array</button>
+          <label class="inline-ctl">Speed
+            <select id="ngSpeed">
+              <option value="1100">Slow</option>
+              <option value="650" selected>Normal</option>
+              <option value="250">Fast</option>
+            </select>
+          </label>
+        </div>
+        <div class="ng-wrap">
+          <div>
+            <div class="ng-row" id="ngArr"></div>
+            <div class="ng-row ans" id="ngAns"></div>
+          </div>
+          <div><div class="sq-stack small" id="ngStack"></div><p class="sq-cap">stack of indices<br>(values decreasing)</p></div>
+        </div>
+        <div class="bs-status" id="ngStatus">For each element, find the first bigger element to its right. Each index is pushed once and popped at most once → O(n).</div>
+      </div>
+    </section>
+
+    <!-- PATTERNS -->
+    <section id="patterns" class="section">
+      <h2><span class="num">04</span> The patterns that matter</h2>
+      <p class="lead small-lead">Almost every stack/queue interview question is one of these.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>1 · Matching pairs</h3>
+          <p>Push openers; on a closer, the top must be its partner. Also: remove adjacent duplicates, backspace strings, decode string.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>bool isValid(string s) {
+    stack&lt;char&gt; st;
+    for (char c : s) {
+        if (c == '(') st.push(')');
+        else if (c == '[') st.push(']');
+        else if (c == '{') st.push('}');
+        else if (st.empty() || st.top() != c) return false;
+        else st.pop();
+    }
+    return st.empty();
+}</code></pre>
+<pre data-lang="java"><code>boolean isValid(String s) {
+    Deque&lt;Character&gt; st = new ArrayDeque&lt;&gt;();
+    for (char c : s.toCharArray()) {
+        if (c == '(') st.push(')');
+        else if (c == '[') st.push(']');
+        else if (c == '{') st.push('}');
+        else if (st.isEmpty() || st.pop() != c) return false;
+    }
+    return st.isEmpty();
+}</code></pre>
+<pre data-lang="js"><code>function isValid(s) {
+    const pair = { "(": ")", "[": "]", "{": "}" };
+    const st = [];
+    for (const c of s) {
+        if (pair[c]) st.push(pair[c]);       // push the expected closer
+        else if (st.pop() !== c) return false;
+    }
+    return st.length === 0;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>2 · Monotonic stack</h3>
+          <p>Keep the stack sorted (e.g. decreasing). When a new element breaks the order, everything you pop has just found its
+            <strong>next greater</strong> element. Daily temperatures, stock span, histogram, trapping rain water.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;int&gt; nextGreater(vector&lt;int&gt;&amp; a) {
+    vector&lt;int&gt; res(a.size(), -1);
+    stack&lt;int&gt; st;                       // indices, values decreasing
+    for (int i = 0; i &lt; a.size(); i++) {
+        while (!st.empty() &amp;&amp; a[st.top()] &lt; a[i]) {
+            res[st.top()] = a[i];
+            st.pop();
+        }
+        st.push(i);
+    }
+    return res;
+}</code></pre>
+<pre data-lang="java"><code>int[] nextGreater(int[] a) {
+    int[] res = new int[a.length];
+    Arrays.fill(res, -1);
+    Deque&lt;Integer&gt; st = new ArrayDeque&lt;&gt;();   // indices, values decreasing
+    for (int i = 0; i &lt; a.length; i++) {
+        while (!st.isEmpty() &amp;&amp; a[st.peek()] &lt; a[i])
+            res[st.pop()] = a[i];
+        st.push(i);
+    }
+    return res;
+}</code></pre>
+<pre data-lang="js"><code>function nextGreater(a) {
+    const res = new Array(a.length).fill(-1);
+    const st = [];                        // indices, values decreasing
+    for (let i = 0; i &lt; a.length; i++) {
+        while (st.length &amp;&amp; a[st[st.length - 1]] &lt; a[i])
+            res[st.pop()] = a[i];
+        st.push(i);
+    }
+    return res;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>3 · Monotonic deque (sliding window)</h3>
+          <p>Store indices with decreasing values. The front is always the window’s max; drop it when it slides out,
+            drop smaller values from the back when a bigger one arrives.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>deque&lt;int&gt; dq;                         // indices, values decreasing
+for (int i = 0; i &lt; n; i++) {
+    if (!dq.empty() &amp;&amp; dq.front() &lt;= i - k) dq.pop_front();     // left the window
+    while (!dq.empty() &amp;&amp; a[dq.back()] &lt;= a[i]) dq.pop_back();  // useless now
+    dq.push_back(i);
+    if (i &gt;= k - 1) out.push_back(a[dq.front()]);
+}</code></pre>
+<pre data-lang="java"><code>Deque&lt;Integer&gt; dq = new ArrayDeque&lt;&gt;(); // indices, values decreasing
+for (int i = 0; i &lt; n; i++) {
+    if (!dq.isEmpty() &amp;&amp; dq.peekFirst() &lt;= i - k) dq.pollFirst();     // left the window
+    while (!dq.isEmpty() &amp;&amp; a[dq.peekLast()] &lt;= a[i]) dq.pollLast();  // useless now
+    dq.offerLast(i);
+    if (i &gt;= k - 1) out[i - k + 1] = a[dq.peekFirst()];
+}</code></pre>
+<pre data-lang="js"><code>const dq = [];                         // indices, values decreasing
+let head = 0;                          // front of the deque (avoid shift)
+for (let i = 0; i &lt; n; i++) {
+    if (head &lt; dq.length &amp;&amp; dq[head] &lt;= i - k) head++;               // left the window
+    while (dq.length &gt; head &amp;&amp; a[dq[dq.length - 1]] &lt;= a[i]) dq.pop(); // useless now
+    dq.push(i);
+    if (i &gt;= k - 1) out.push(a[dq[head]]);
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>4 · BFS with a queue</h3>
+          <p>A queue explores in layers: everything 1 step away, then 2 steps, … That’s why BFS finds shortest paths in unweighted graphs and grids.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>queue&lt;int&gt; q;
+q.push(start); seen[start] = true;
+for (int steps = 0; !q.empty(); steps++) {
+    for (int sz = q.size(); sz &gt; 0; sz--) {      // one whole layer
+        int u = q.front(); q.pop();
+        for (int v : adj[u])
+            if (!seen[v]) { seen[v] = true; q.push(v); }
+    }
+}</code></pre>
+<pre data-lang="java"><code>Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+q.offer(start); seen[start] = true;
+for (int steps = 0; !q.isEmpty(); steps++) {
+    for (int sz = q.size(); sz &gt; 0; sz--) {      // one whole layer
+        int u = q.poll();
+        for (int v : adj.get(u))
+            if (!seen[v]) { seen[v] = true; q.offer(v); }
+    }
+}</code></pre>
+<pre data-lang="js"><code>let layer = [start];
+seen[start] = true;
+for (let steps = 0; layer.length; steps++) {
+    const next = [];                             // one whole layer at a time
+    for (const u of layer)
+        for (const v of adj[u])
+            if (!seen[v]) { seen[v] = true; next.push(v); }
+    layer = next;
+}</code></pre>
+          </div>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Two more tricks:</strong> a <em>min stack</em> stores the current minimum alongside each value, so <code>getMin()</code> is O(1);
+        and a <em>queue from two stacks</em> pours the “in” stack into the “out” stack only when “out” is empty — every element moves at most once, so it’s amortised O(1).
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">05</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🧭</div><h3>Which one?</h3>
+          <p>Need the <em>most recent</em> unfinished thing? Stack. Need things in <em>arrival order</em> or layer by layer? Queue.</p></div>
+        <div class="tip card"><div class="tip-ico">🔗</div><h3>“Nearest” means stack</h3>
+          <p>“Next greater”, “previous smaller”, “nearest wall” → monotonic stack, O(n) instead of O(n²).</p></div>
+        <div class="tip card"><div class="tip-ico">🪟</div><h3>Window max/min means deque</h3>
+          <p>Sliding window maximum or minimum → monotonic deque of indices. Each index enters and leaves once.</p></div>
+        <div class="tip card"><div class="tip-ico">📍</div><h3>Store indices, not values</h3>
+          <p>Indices give you both the value (<code>a[i]</code>) and the distance (<code>i − j</code>) — needed for spans, widths and windows.</p></div>
+        <div class="tip card"><div class="tip-ico">🛑</div><h3>Check empty before pop</h3>
+          <p>Popping or peeking an empty stack is the #1 runtime error. In C++ it’s undefined behaviour, not an exception.</p></div>
+        <div class="tip card"><div class="tip-ico">🐢</div><h3>Don’t <code>shift()</code> in JS</h3>
+          <p><code>array.shift()</code> is O(n). Use a head index, a ring buffer, or swap whole layers in BFS.</p></div>
+        <div class="tip card"><div class="tip-ico">☕</div><h3>Java: use ArrayDeque</h3>
+          <p>The old <code>Stack</code> class is synchronised and slow. <code>ArrayDeque</code> is the modern stack <em>and</em> queue.</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Recursion is a stack</h3>
+          <p>Any recursive DFS can be rewritten with an explicit stack — handy when recursion depth would overflow.</p></div>
+        <div class="tip card"><div class="tip-ico">🧮</div><h3>Expressions → stacks</h3>
+          <p>Postfix (RPN) evaluation needs one stack. Infix with brackets: push the running result and sign when you see “(”.</p></div>
+        <div class="tip card"><div class="tip-ico">♻️</div><h3>Ring buffer for fixed size</h3>
+          <p><code>(head + size) % cap</code> is the tail. Track <code>size</code> to tell “full” from “empty”.</p></div>
+        <div class="tip card"><div class="tip-ico">➕</div><h3>Augment the stack</h3>
+          <p>Store pairs like (value, min so far) or (price, span) to answer extra queries in O(1).</p></div>
+        <div class="tip card"><div class="tip-ico">✏️</div><h3>Trace the stack on paper</h3>
+          <p>Write the stack contents after each step for a small input. Monotonic-stack bugs become obvious.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Popping/peeking an empty stack or queue.</li>
+            <li>Forgetting to check the stack is empty at the end (unclosed brackets).</li>
+            <li>In C++, expecting <code>st.pop()</code> to return the value (it returns <code>void</code>).</li>
+            <li>Using <code>array.shift()</code> in a JS BFS loop → O(n²).</li>
+            <li>Comparing with <code>&lt;</code> vs <code>&lt;=</code> wrong in a monotonic stack (duplicates!).</li>
+            <li>Pushing values when you later need indices (widths, spans).</li>
+            <li>Ring buffer can’t tell full from empty because size isn’t tracked.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> implement a stack, a ring-buffer queue; valid parentheses.</li>
+            <li><strong>Day 2:</strong> queue using stacks, stack using queues, baseball game.</li>
+            <li><strong>Day 3:</strong> backspace compare, remove adjacent duplicates, recent calls.</li>
+            <li><strong>Day 4:</strong> min stack, evaluate RPN, simplify path.</li>
+            <li><strong>Day 5:</strong> daily temperatures, next greater element II.</li>
+            <li><strong>Day 6:</strong> online stock span, asteroid collision.</li>
+            <li><strong>Day 7:</strong> decode string, design circular queue.</li>
+            <li><strong>Day 8:</strong> rotting oranges (multi-source BFS).</li>
+            <li><strong>Day 9:</strong> sliding window maximum, largest rectangle in histogram.</li>
+            <li><strong>Day 10:</strong> basic calculator; redo the ones you got wrong.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">06</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">07</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Stack for “most recent”, queue for “in order”, monotonic for “nearest bigger”.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

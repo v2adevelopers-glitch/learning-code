@@ -15,6 +15,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Greedy Algorithms](greedy/index.html) — the greedy-choice property, proof techniques (exchange
   argument, stays ahead), six common patterns, visualizers comparing interval-scheduling rules and
   greedy vs optimal coin change, tips & tricks, 20 important questions and a quiz.
+- [Stacks & Queues](stack-queue/index.html) — LIFO vs FIFO, deques and ring buffers, built-ins and
+  implementations, monotonic stack/deque and BFS patterns, visualizers (push/pop/enqueue/dequeue,
+  balanced brackets, next greater element), tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.
