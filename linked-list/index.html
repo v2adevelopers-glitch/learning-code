@@ -31,7 +31,7 @@
         <div class="lang-switch" role="group" aria-label="Code language">
           <button data-lang="cpp" class="active">C++</button>
           <button data-lang="java">Java</button>
-          <button data-lang="python">Python</button>
+          <button data-lang="js">JavaScript</button>
         </div>
         <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
       </div>
@@ -117,12 +117,14 @@ head-&gt;next-&gt;next = new ListNode(9);   // 7 -&gt; 3 -&gt; 9 -&gt; null</cod
 ListNode head = new ListNode(7);
 head.next = new ListNode(3);
 head.next.next = new ListNode(9);    // 7 -&gt; 3 -&gt; 9 -&gt; null</code></pre>
-<pre data-lang="python"><code>class ListNode:
-    def __init__(self, val=0, next=None):
-        self.val = val
-        self.next = next
+<pre data-lang="js"><code>class ListNode {
+    constructor(val = 0, next = null) {
+        this.val = val;
+        this.next = next;
+    }
+}
 
-head = ListNode(7, ListNode(3, ListNode(9)))   # 7 -&gt; 3 -&gt; 9 -&gt; None</code></pre>
+const head = new ListNode(7, new ListNode(3, new ListNode(9)));   // 7 -&gt; 3 -&gt; 9 -&gt; null</code></pre>
       </div>
 
       <h3 class="sub">Array vs linked list</h3>
@@ -170,17 +172,16 @@ ListNode find(ListNode head, int x) {
     while (cur != null &amp;&amp; cur.val != x) cur = cur.next;
     return cur;                       // null if not found
 }</code></pre>
-<pre data-lang="python"><code>def length(head):
-    n, cur = 0, head
-    while cur:
-        n, cur = n + 1, cur.next
-    return n
-
-def find(head, x):
-    cur = head
-    while cur and cur.val != x:
-        cur = cur.next
-    return cur                        # None if not found</code></pre>
+<pre data-lang="js"><code>function length(head) {
+    let n = 0;
+    for (let cur = head; cur; cur = cur.next) n++;
+    return n;
+}
+function find(head, x) {
+    let cur = head;
+    while (cur &amp;&amp; cur.val !== x) cur = cur.next;
+    return cur;                       // null if not found
+}</code></pre>
           </div>
         </article>
 
@@ -207,13 +208,14 @@ void insertAfter(ListNode prev, int x) {
     node.next = prev.next;            // 1. connect new first
     prev.next = node;                 // 2. then break old link
 }</code></pre>
-<pre data-lang="python"><code>def push_front(head, x):
-    return ListNode(x, head)          # new node points at old head
-
-def insert_after(prev, x):
-    node = ListNode(x)
-    node.next = prev.next             # 1. connect new first
-    prev.next = node                  # 2. then break old link</code></pre>
+<pre data-lang="js"><code>function pushFront(head, x) {
+    return new ListNode(x, head);     // new node points at old head
+}
+function insertAfter(prev, x) {
+    const node = new ListNode(x);
+    node.next = prev.next;            // 1. connect new first
+    prev.next = node;                 // 2. then break old link
+}</code></pre>
           </div>
         </article>
 
@@ -237,15 +239,14 @@ def insert_after(prev, x):
     cur.next = node;
     return head;
 }</code></pre>
-<pre data-lang="python"><code>def push_back(head, x):
-    node = ListNode(x)
-    if not head:
-        return node
-    cur = head
-    while cur.next:
-        cur = cur.next
-    cur.next = node
-    return head</code></pre>
+<pre data-lang="js"><code>function pushBack(head, x) {
+    const node = new ListNode(x);
+    if (!head) return node;
+    let cur = head;
+    while (cur.next) cur = cur.next;
+    cur.next = node;
+    return head;
+}</code></pre>
           </div>
         </article>
 
@@ -273,14 +274,13 @@ def insert_after(prev, x):
     if (prev.next != null) prev.next = prev.next.next;   // bypass
     return dummy.next;
 }</code></pre>
-<pre data-lang="python"><code>def remove_value(head, x):
-    dummy = ListNode(0, head)
-    prev = dummy
-    while prev.next and prev.next.val != x:
-        prev = prev.next
-    if prev.next:
-        prev.next = prev.next.next    # bypass
-    return dummy.next</code></pre>
+<pre data-lang="js"><code>function removeValue(head, x) {
+    const dummy = new ListNode(0, head);
+    let prev = dummy;
+    while (prev.next &amp;&amp; prev.next.val !== x) prev = prev.next;
+    if (prev.next) prev.next = prev.next.next;   // bypass
+    return dummy.next;
+}</code></pre>
           </div>
         </article>
       </div>
@@ -340,9 +340,10 @@ return dummy.next;</code></pre>
 ListNode tail = dummy;
 // ... tail.next = someNode; tail = tail.next; ...
 return dummy.next;</code></pre>
-<pre data-lang="python"><code>dummy = tail = ListNode(0)
-# ... tail.next = some_node; tail = tail.next ...
-return dummy.next</code></pre>
+<pre data-lang="js"><code>const dummy = new ListNode(0);
+let tail = dummy;
+// ... tail.next = someNode; tail = tail.next; ...
+return dummy.next;</code></pre>
           </div>
         </article>
 
@@ -365,13 +366,13 @@ while (fast != null &amp;&amp; fast.next != null) {
     if (slow == fast) { /* cycle! */ }
 }
 // no cycle: slow is the middle (2nd middle for even length)</code></pre>
-<pre data-lang="python"><code>slow = fast = head
-while fast and fast.next:
-    slow = slow.next
-    fast = fast.next.next
-    if slow is fast:
-        ...  # cycle!
-# no cycle: slow is the middle (2nd middle for even length)</code></pre>
+<pre data-lang="js"><code>let slow = head, fast = head;
+while (fast &amp;&amp; fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) { /* cycle! */ }
+}
+// no cycle: slow is the middle (2nd middle for even length)</code></pre>
           </div>
         </article>
 
@@ -400,13 +401,16 @@ while fast and fast.next:
     }
     return prev;                      // new head
 }</code></pre>
-<pre data-lang="python"><code>def reverse(head):
-    prev, curr = None, head
-    while curr:
-        nxt = curr.next               # 1. save
-        curr.next = prev              # 2. flip
-        prev, curr = curr, nxt        # 3. advance
-    return prev                       # new head</code></pre>
+<pre data-lang="js"><code>function reverse(head) {
+    let prev = null, curr = head;
+    while (curr) {
+        const next = curr.next;       // 1. save
+        curr.next = prev;             // 2. flip
+        prev = curr;                  // 3. advance
+        curr = next;
+    }
+    return prev;                      // new head
+}</code></pre>
           </div>
         </article>
 
@@ -434,16 +438,17 @@ while fast and fast.next:
     tail.next = (a != null) ? a : b;
     return dummy.next;
 }</code></pre>
-<pre data-lang="python"><code>def merge(a, b):
-    dummy = tail = ListNode(0)
-    while a and b:
-        if a.val &lt;= b.val:
-            tail.next, a = a, a.next
-        else:
-            tail.next, b = b, b.next
-        tail = tail.next
-    tail.next = a or b
-    return dummy.next</code></pre>
+<pre data-lang="js"><code>function merge(a, b) {
+    const dummy = new ListNode(0);
+    let tail = dummy;
+    while (a &amp;&amp; b) {
+        if (a.val &lt;= b.val) { tail.next = a; a = a.next; }
+        else                { tail.next = b; b = b.next; }
+        tail = tail.next;
+    }
+    tail.next = a || b;
+    return dummy.next;
+}</code></pre>
           </div>
         </article>
       </div>
@@ -480,7 +485,7 @@ while fast and fast.next:
         <div class="tip card"><div class="tip-ico">♻️</div><h3>Recursion mirrors the list</h3>
           <p>“Solve for <code>head.next</code>, then fix up <code>head</code>.” Great for reverse and merge — but uses O(n) stack.</p></div>
         <div class="tip card"><div class="tip-ico">🧹</div><h3>Free memory in C++</h3>
-          <p>When deleting a node in C++, <code>delete</code> it after unlinking. Java and Python garbage-collect it for you.</p></div>
+          <p>When deleting a node in C++, <code>delete</code> it after unlinking. Java and JavaScript garbage-collect it for you.</p></div>
         <div class="tip card"><div class="tip-ico">🗣️</div><h3>Say the invariant</h3>
           <p>e.g. “everything before <code>curr</code> is already reversed and starts at <code>prev</code>”. Interviewers love it.</p></div>
       </div>

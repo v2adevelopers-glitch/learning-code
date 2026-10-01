@@ -1,5 +1,5 @@
 // Question bank for the "Important questions" section.
-// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,python}
+// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,js}
 window.QUESTIONS = [
   {
     id: "bs-classic",
@@ -33,17 +33,16 @@ window.QUESTIONS = [
     }
     return -1;
 }`,
-      python: `def search(a, target):
-    lo, hi = 0, len(a) - 1
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        if a[mid] == target:
-            return mid
-        if a[mid] < target:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return -1`
+      js: `function search(a, target) {
+    let lo = 0, hi = a.length - 1;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] === target) return mid;
+        if (a[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}`
     }
   },
   {
@@ -76,16 +75,15 @@ window.QUESTIONS = [
     }
     return lo;
 }`,
-      python: `def search_insert(a, target):
-    lo, hi = 0, len(a)
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if a[mid] >= target:
-            hi = mid
-        else:
-            lo = mid + 1
-    return lo
-    # or: return bisect.bisect_left(a, target)`
+      js: `function searchInsert(a, target) {
+    let lo = 0, hi = a.length;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] >= target) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -118,15 +116,15 @@ window.QUESTIONS = [
     }
     return (int) lo;
 }`,
-      python: `def my_sqrt(x):
-    lo, hi = 0, x
-    while lo < hi:
-        mid = (lo + hi + 1) // 2                  # round up
-        if mid * mid <= x:
-            lo = mid
-        else:
-            hi = mid - 1
-    return lo`
+      js: `function mySqrt(x) {
+    let lo = 0, hi = x;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi + 1) / 2);   // round up
+        if (mid <= x / mid) lo = mid;                 // mid * mid <= x, without huge products
+        else hi = mid - 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -159,15 +157,15 @@ window.QUESTIONS = [
     }
     return lo;
 }`,
-      python: `def first_bad_version(n):
-    lo, hi = 1, n
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if isBadVersion(mid):
-            hi = mid
-        else:
-            lo = mid + 1
-    return lo`
+      js: `function firstBadVersion(n) {
+    let lo = 1, hi = n;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);   // JS numbers are exact up to 2^53, no int overflow
+        if (isBadVersion(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -202,18 +200,16 @@ window.QUESTIONS = [
     }
     return false;
 }`,
-      python: `def is_perfect_square(num):
-    lo, hi = 1, num
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        sq = mid * mid
-        if sq == num:
-            return True
-        if sq < num:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return False`
+      js: `function isPerfectSquare(num) {
+    let lo = 1, hi = num;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2), sq = mid * mid;
+        if (sq === num) return true;
+        if (sq < num) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return false;
+}`
     }
   },
   {
@@ -246,15 +242,15 @@ window.QUESTIONS = [
     }
     return lo + k;
 }`,
-      python: `def find_kth_positive(a, k):
-    lo, hi = 0, len(a)
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if a[mid] - (mid + 1) >= k:
-            hi = mid
-        else:
-            lo = mid + 1
-    return lo + k`
+      js: `function findKthPositive(a, k) {
+    let lo = 0, hi = a.length;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] - (mid + 1) >= k) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo + k;
+}`
     }
   },
   {
@@ -297,13 +293,20 @@ private int bound(int[] a, int t, boolean strict) {   // first a[i] >= t (or > t
     }
     return lo;
 }`,
-      python: `from bisect import bisect_left, bisect_right
-
-def search_range(a, t):
-    first = bisect_left(a, t)
-    if first == len(a) or a[first] != t:
-        return [-1, -1]
-    return [first, bisect_right(a, t) - 1]`
+      js: `function bound(a, t, strict) {          // first a[i] >= t (or > t)
+    let lo = 0, hi = a.length;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (strict ? a[mid] > t : a[mid] >= t) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}
+function searchRange(a, t) {
+    const first = bound(a, t, false);
+    if (first === a.length || a[first] !== t) return [-1, -1];
+    return [first, bound(a, t, true) - 1];
+}`
     }
   },
   {
@@ -348,23 +351,21 @@ def search_range(a, t):
     }
     return -1;
 }`,
-      python: `def search_rotated(a, t):
-    lo, hi = 0, len(a) - 1
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        if a[mid] == t:
-            return mid
-        if a[lo] <= a[mid]:                 # left half sorted
-            if a[lo] <= t < a[mid]:
-                hi = mid - 1
-            else:
-                lo = mid + 1
-        else:                               # right half sorted
-            if a[mid] < t <= a[hi]:
-                lo = mid + 1
-            else:
-                hi = mid - 1
-    return -1`
+      js: `function search(a, t) {
+    let lo = 0, hi = a.length - 1;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] === t) return mid;
+        if (a[lo] <= a[mid]) {                       // left half sorted
+            if (a[lo] <= t && t < a[mid]) hi = mid - 1;
+            else lo = mid + 1;
+        } else {                                     // right half sorted
+            if (a[mid] < t && t <= a[hi]) lo = mid + 1;
+            else hi = mid - 1;
+        }
+    }
+    return -1;
+}`
     }
   },
   {
@@ -397,15 +398,15 @@ def search_range(a, t):
     }
     return a[lo];
 }`,
-      python: `def find_min(a):
-    lo, hi = 0, len(a) - 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if a[mid] > a[hi]:
-            lo = mid + 1
-        else:
-            hi = mid
-    return a[lo]`
+      js: `function findMin(a) {
+    let lo = 0, hi = a.length - 1;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] > a[hi]) lo = mid + 1;
+        else hi = mid;
+    }
+    return a[lo];
+}`
     }
   },
   {
@@ -438,15 +439,15 @@ def search_range(a, t):
     }
     return lo;
 }`,
-      python: `def find_peak_element(a):
-    lo, hi = 0, len(a) - 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if a[mid] < a[mid + 1]:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo`
+      js: `function findPeakElement(a) {
+    let lo = 0, hi = a.length - 1;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] < a[mid + 1]) lo = mid + 1;
+        else hi = mid;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -481,17 +482,16 @@ def search_range(a, t):
     }
     return a[lo];
 }`,
-      python: `def single_non_duplicate(a):
-    lo, hi = 0, len(a) - 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if mid % 2 == 1:                    # pair starts at an even index
-            mid -= 1
-        if a[mid] == a[mid + 1]:
-            lo = mid + 2
-        else:
-            hi = mid
-    return a[lo]`
+      js: `function singleNonDuplicate(a) {
+    let lo = 0, hi = a.length - 1;
+    while (lo < hi) {
+        let mid = Math.floor((lo + hi) / 2);
+        if (mid % 2 === 1) mid--;            // pair starts at an even index
+        if (a[mid] === a[mid + 1]) lo = mid + 2;
+        else hi = mid;
+    }
+    return a[lo];
+}`
     }
   },
   {
@@ -528,19 +528,17 @@ def search_range(a, t):
     }
     return false;
 }`,
-      python: `def search_matrix(a, target):
-    R, C = len(a), len(a[0])
-    lo, hi = 0, R * C - 1
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        v = a[mid // C][mid % C]
-        if v == target:
-            return True
-        if v < target:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return False`
+      js: `function searchMatrix(a, target) {
+    const R = a.length, C = a[0].length;
+    let lo = 0, hi = R * C - 1;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const v = a[Math.floor(mid / C)][mid % C];
+        if (v === target) return true;
+        if (v < target) lo = mid + 1; else hi = mid - 1;
+    }
+    return false;
+}`
     }
   },
   {
@@ -578,16 +576,17 @@ def search_range(a, t):
     }
     return lo;
 }`,
-      python: `def min_eating_speed(piles, h):
-    lo, hi = 1, max(piles)
-    while lo < hi:
-        k = (lo + hi) // 2
-        hours = sum((p + k - 1) // k for p in piles)
-        if hours <= h:
-            hi = k
-        else:
-            lo = k + 1
-    return lo`
+      js: `function minEatingSpeed(piles, h) {
+    let lo = 1, hi = Math.max(...piles);
+    while (lo < hi) {
+        const k = Math.floor((lo + hi) / 2);
+        let hours = 0;
+        for (const p of piles) hours += Math.ceil(p / k);
+        if (hours <= h) hi = k;
+        else lo = k + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -630,23 +629,20 @@ def search_range(a, t):
     }
     return lo;
 }`,
-      python: `def ship_within_days(w, days):
-    def need(cap):
-        d, cur = 1, 0
-        for x in w:
-            if cur + x > cap:
-                d, cur = d + 1, 0
-            cur += x
-        return d
-
-    lo, hi = max(w), sum(w)
-    while lo < hi:
-        cap = (lo + hi) // 2
-        if need(cap) <= days:
-            hi = cap
-        else:
-            lo = cap + 1
-    return lo`
+      js: `function shipWithinDays(w, days) {
+    let lo = Math.max(...w), hi = w.reduce((s, x) => s + x, 0);
+    while (lo < hi) {
+        const cap = Math.floor((lo + hi) / 2);
+        let need = 1, cur = 0;
+        for (const x of w) {
+            if (cur + x > cap) { need++; cur = 0; }
+            cur += x;
+        }
+        if (need <= days) hi = cap;
+        else lo = cap + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -691,26 +687,21 @@ def search_range(a, t):
     }
     return lo;
 }`,
-      python: `def min_days(bloom, m, k):
-    if m * k > len(bloom):
-        return -1
-
-    def bouquets(day):
-        made = run = 0
-        for b in bloom:
-            run = run + 1 if b <= day else 0
-            if run == k:
-                made, run = made + 1, 0
-        return made
-
-    lo, hi = min(bloom), max(bloom)
-    while lo < hi:
-        day = (lo + hi) // 2
-        if bouquets(day) >= m:
-            hi = day
-        else:
-            lo = day + 1
-    return lo`
+      js: `function minDays(bloom, m, k) {
+    if (m * k > bloom.length) return -1;
+    let lo = Math.min(...bloom), hi = Math.max(...bloom);
+    while (lo < hi) {
+        const day = Math.floor((lo + hi) / 2);
+        let run = 0, made = 0;
+        for (const b of bloom) {
+            run = b <= day ? run + 1 : 0;
+            if (run === k) { made++; run = 0; }
+        }
+        if (made >= m) hi = day;
+        else lo = day + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -745,15 +736,15 @@ def search_range(a, t):
     for (int i = lo; i < lo + k; i++) res.add(a[i]);
     return res;
 }`,
-      python: `def find_closest_elements(a, k, x):
-    lo, hi = 0, len(a) - k
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if x - a[mid] > a[mid + k] - x:
-            lo = mid + 1
-        else:
-            hi = mid
-    return a[lo:lo + k]`
+      js: `function findClosestElements(a, k, x) {
+    let lo = 0, hi = a.length - k;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (x - a[mid] > a[mid + k] - x) lo = mid + 1;
+        else hi = mid;
+    }
+    return a.slice(lo, lo + k);
+}`
     }
   },
   {
@@ -800,24 +791,22 @@ private boolean canPlace(int[] s, int c, int d) {
         if (x - last >= d) { placed++; last = x; }
     return placed >= c;
 }`,
-      python: `def aggressive_cows(stalls, c):
-    s = sorted(stalls)
-
-    def can_place(d):
-        placed, last = 1, s[0]
-        for x in s:
-            if x - last >= d:
-                placed, last = placed + 1, x
-        return placed >= c
-
-    lo, hi = 1, s[-1] - s[0]
-    while lo < hi:
-        mid = (lo + hi + 1) // 2            # round up: we set lo = mid
-        if can_place(mid):
-            lo = mid
-        else:
-            hi = mid - 1
-    return lo`
+      js: `function aggressiveCows(stalls, c) {
+    const s = [...stalls].sort((x, y) => x - y);   // numeric sort! default sort is by string
+    const canPlace = d => {
+        let placed = 1, last = s[0];
+        for (const x of s)
+            if (x - last >= d) { placed++; last = x; }
+        return placed >= c;
+    };
+    let lo = 1, hi = s[s.length - 1] - s[0];
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi + 1) / 2);   // round up: we set lo = mid
+        if (canPlace(mid)) lo = mid;
+        else hi = mid - 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -852,17 +841,16 @@ private boolean canPlace(int[] s, int c, int d) {
     }
     return a[lo];
 }`,
-      python: `def find_min_dups(a):
-    lo, hi = 0, len(a) - 1
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if a[mid] > a[hi]:
-            lo = mid + 1
-        elif a[mid] < a[hi]:
-            hi = mid
-        else:
-            hi -= 1
-    return a[lo]`
+      js: `function findMin(a) {
+    let lo = 0, hi = a.length - 1;
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] > a[hi]) lo = mid + 1;
+        else if (a[mid] < a[hi]) hi = mid;
+        else hi--;
+    }
+    return a[lo];
+}`
     }
   },
   {
@@ -907,23 +895,20 @@ private boolean canPlace(int[] s, int c, int d) {
     }
     return (int) lo;
 }`,
-      python: `def split_array(a, k):
-    def parts(cap):
-        p, cur = 1, 0
-        for x in a:
-            if cur + x > cap:
-                p, cur = p + 1, 0
-            cur += x
-        return p
-
-    lo, hi = max(a), sum(a)
-    while lo < hi:
-        cap = (lo + hi) // 2
-        if parts(cap) <= k:
-            hi = cap
-        else:
-            lo = cap + 1
-    return lo`
+      js: `function splitArray(a, k) {
+    let lo = Math.max(...a), hi = a.reduce((s, x) => s + x, 0);
+    while (lo < hi) {
+        const cap = Math.floor((lo + hi) / 2);
+        let parts = 1, cur = 0;
+        for (const x of a) {
+            if (cur + x > cap) { parts++; cur = 0; }
+            cur += x;
+        }
+        if (parts <= k) hi = cap;
+        else lo = cap + 1;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -970,27 +955,23 @@ private boolean canPlace(int[] s, int c, int d) {
     }
     return 0.0;
 }`,
-      python: `def find_median_sorted_arrays(A, B):
-    if len(A) > len(B):
-        A, B = B, A
-    m, n = len(A), len(B)
-    lo, hi = 0, m
-    INF = float("inf")
-    while lo <= hi:
-        i = (lo + hi) // 2
-        j = (m + n + 1) // 2 - i
-        aL = A[i - 1] if i > 0 else -INF
-        aR = A[i] if i < m else INF
-        bL = B[j - 1] if j > 0 else -INF
-        bR = B[j] if j < n else INF
-        if aL <= bR and bL <= aR:
-            if (m + n) % 2:
-                return float(max(aL, bL))
-            return (max(aL, bL) + min(aR, bR)) / 2
-        if aL > bR:
-            hi = i - 1
-        else:
-            lo = i + 1`
+      js: `function findMedianSortedArrays(A, B) {
+    if (A.length > B.length) [A, B] = [B, A];
+    const m = A.length, n = B.length;
+    let lo = 0, hi = m;
+    while (lo <= hi) {
+        const i = Math.floor((lo + hi) / 2), j = Math.floor((m + n + 1) / 2) - i;
+        const aL = i === 0 ? -Infinity : A[i - 1], aR = i === m ? Infinity : A[i];
+        const bL = j === 0 ? -Infinity : B[j - 1], bR = j === n ? Infinity : B[j];
+        if (aL <= bR && bL <= aR) {
+            if ((m + n) % 2 === 1) return Math.max(aL, bL);
+            return (Math.max(aL, bL) + Math.min(aR, bR)) / 2;
+        }
+        if (aL > bR) hi = i - 1;
+        else lo = i + 1;
+    }
+    return 0;
+}`
     }
   }
 ];
@@ -1039,9 +1020,9 @@ window.QUIZ = [
     exp: "Binary search on the answer: feasibility is monotonic in capacity, and each check is an O(n) greedy pass."
   },
   {
-    q: "Python: bisect_left([1, 3, 3, 7], 3) returns…",
-    opts: ["0", "1", "2", "3"],
+    q: "JavaScript: with lo = 2 and hi = 7, what is (lo + hi) / 2?",
+    opts: ["4", "4.5", "5", "It throws an error"],
     a: 1,
-    exp: "bisect_left is lower bound: the first position where 3 could be inserted keeping order, i.e. before the existing 3s → 1."
+    exp: "JavaScript's / is floating-point division, so you get 4.5 and a[4.5] is undefined. Use Math.floor((lo + hi) / 2) (or (lo + hi) >>> 1 for array indices)."
   }
 ];

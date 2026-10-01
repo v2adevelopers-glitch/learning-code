@@ -31,7 +31,7 @@
         <div class="lang-switch" role="group" aria-label="Code language">
           <button data-lang="cpp" class="active">C++</button>
           <button data-lang="java">Java</button>
-          <button data-lang="python">Python</button>
+          <button data-lang="js">JavaScript</button>
         </div>
         <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
       </div>
@@ -167,11 +167,10 @@ int count = 0;
 long lastEnd = Long.MIN_VALUE;
 for (int[] x : iv)
     if (x[0] &gt;= lastEnd) { count++; lastEnd = x[1]; }</code></pre>
-<pre data-lang="python"><code>iv.sort(key=lambda x: x[1])
-count, last_end = 0, float("-inf")
-for s, e in iv:
-    if s &gt;= last_end:
-        count, last_end = count + 1, e</code></pre>
+<pre data-lang="js"><code>iv.sort((a, b) =&gt; a[1] - b[1]);       // always pass a comparator in JS!
+let count = 0, lastEnd = -Infinity;
+for (const [s, e] of iv)
+    if (s &gt;= lastEnd) { count++; lastEnd = e; }</code></pre>
           </div>
         </article>
 
@@ -193,14 +192,13 @@ while (i &lt;= j) {
     if (p[i] + p[j] &lt;= limit) i++;
     j--; boats++;
 }</code></pre>
-<pre data-lang="python"><code># boats: heaviest person always boards; take the lightest too if it fits
-p.sort()
-i, j, boats = 0, len(p) - 1, 0
-while i &lt;= j:
-    if p[i] + p[j] &lt;= limit:
-        i += 1
-    j -= 1
-    boats += 1</code></pre>
+<pre data-lang="js"><code>// boats: heaviest person always boards; take the lightest too if it fits
+p.sort((a, b) =&gt; a - b);
+let i = 0, j = p.length - 1, boats = 0;
+while (i &lt;= j) {
+    if (p[i] + p[j] &lt;= limit) i++;
+    j--; boats++;
+}</code></pre>
           </div>
         </article>
 
@@ -220,12 +218,12 @@ for (int i = 0; i &lt; n; i++) {
     reach = Math.max(reach, i + a[i]);
 }
 return true;</code></pre>
-<pre data-lang="python"><code>reach = 0
-for i, x in enumerate(a):
-    if i &gt; reach:
-        return False                  # can't even get here
-    reach = max(reach, i + x)
-return True</code></pre>
+<pre data-lang="js"><code>let reach = 0;
+for (let i = 0; i &lt; a.length; i++) {
+    if (i &gt; reach) return false;      // can't even get here
+    reach = Math.max(reach, i + a[i]);
+}
+return true;</code></pre>
           </div>
         </article>
 
@@ -247,14 +245,13 @@ for (int i = 0; i &lt; n; i++) {
     if (tank &lt; 0) { start = i + 1; tank = 0; }
 }
 return total &lt; 0 ? -1 : start;</code></pre>
-<pre data-lang="python"><code>total = tank = start = 0
-for i in range(n):
-    d = gas[i] - cost[i]
-    total += d
-    tank += d
-    if tank &lt; 0:
-        start, tank = i + 1, 0
-return -1 if total &lt; 0 else start</code></pre>
+<pre data-lang="js"><code>let total = 0, tank = 0, start = 0;
+for (let i = 0; i &lt; n; i++) {
+    const d = gas[i] - cost[i];
+    total += d; tank += d;
+    if (tank &lt; 0) { start = i + 1; tank = 0; }
+}
+return total &lt; 0 ? -1 : start;</code></pre>
           </div>
         </article>
 
@@ -278,14 +275,46 @@ while (pq.size() &gt; 1) {
     long a = pq.poll(), b = pq.poll();
     cost += a + b; pq.add(a + b);
 }</code></pre>
-<pre data-lang="python"><code># min cost to connect ropes: always join the two shortest
-import heapq
-heapq.heapify(r)
-cost = 0
-while len(r) &gt; 1:
-    a, b = heapq.heappop(r), heapq.heappop(r)
-    cost += a + b
-    heapq.heappush(r, a + b)</code></pre>
+<pre data-lang="js"><code>// JS has no built-in priority queue, so keep a small one handy:
+class MinHeap {
+    constructor() { this.a = []; }
+    get size() { return this.a.length; }
+    push(x) {
+        const a = this.a;
+        a.push(x);
+        for (let i = a.length - 1; i &gt; 0; ) {
+            const p = (i - 1) &gt;&gt; 1;
+            if (a[p] &lt;= a[i]) break;
+            [a[p], a[i]] = [a[i], a[p]];
+            i = p;
+        }
+    }
+    pop() {
+        const a = this.a, top = a[0], last = a.pop();
+        if (a.length) {
+            a[0] = last;
+            for (let i = 0; ; ) {
+                const l = 2 * i + 1, r = l + 1;
+                let m = i;
+                if (l &lt; a.length &amp;&amp; a[l] &lt; a[m]) m = l;
+                if (r &lt; a.length &amp;&amp; a[r] &lt; a[m]) m = r;
+                if (m === i) break;
+                [a[m], a[i]] = [a[i], a[m]];
+                i = m;
+            }
+        }
+        return top;
+    }
+}
+
+// min cost to connect ropes: always join the two shortest
+const pq = new MinHeap();
+for (const x of ropes) pq.push(x);
+let cost = 0;
+while (pq.size &gt; 1) {
+    const a = pq.pop(), b = pq.pop();
+    cost += a + b; pq.push(a + b);
+}</code></pre>
           </div>
         </article>
 
@@ -313,15 +342,15 @@ for (int[] it : items) {          // it = {value, weight}
     total += (double) it[0] * take / it[1];
     cap -= take;
 }</code></pre>
-<pre data-lang="python"><code># fractional knapsack: highest value/weight first
-items.sort(key=lambda it: it[0] / it[1], reverse=True)   # (value, weight)
-total = 0.0
-for v, w in items:
-    if cap == 0:
-        break
-    take = min(cap, w)
-    total += v * take / w
-    cap -= take</code></pre>
+<pre data-lang="js"><code>// fractional knapsack: highest value/weight first
+items.sort((a, b) =&gt; b.v / b.w - a.v / a.w);   // items = [{ v, w }, ...]
+let total = 0;
+for (const { v, w } of items) {
+    if (cap === 0) break;
+    const take = Math.min(cap, w);
+    total += v * take / w;
+    cap -= take;
+}</code></pre>
           </div>
         </article>
       </div>
@@ -400,7 +429,7 @@ for v, w in items:
         <div class="tip card"><div class="tip-ico">📦</div><h3>Heap when choices evolve</h3>
           <p>If the “best available” option changes as you go (new items unlock, old ones expire), keep them in a priority queue.</p></div>
         <div class="tip card"><div class="tip-ico">🤝</div><h3>Ties and comparators</h3>
-          <p>Decide what happens on ties, and use <code>Integer.compare</code> instead of <code>a - b</code> to avoid overflow.</p></div>
+          <p>Decide what happens on ties, and use <code>Integer.compare</code> instead of <code>a - b</code> to avoid overflow. In JavaScript, always pass a comparator: <code>[10, 9, 1].sort()</code> sorts as strings → <code>[1, 10, 9]</code>.</p></div>
         <div class="tip card"><div class="tip-ico">🔢</div><h3>Counting beats simulating</h3>
           <p>Task scheduler, hand of straights: count frequencies first; a formula or a sorted map is often enough.</p></div>
         <div class="tip card"><div class="tip-ico">📐</div><h3>Touching intervals</h3>

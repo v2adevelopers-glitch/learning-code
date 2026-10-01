@@ -28,10 +28,10 @@
   const KW = {
     cpp: "int|long|bool|char|void|auto|return|for|while|if|else|continue|break|true|false|vector|class|public|private|const|stack|double|priority_queue|map|pair|string",
     java: "int|long|boolean|char|void|return|for|while|if|else|continue|break|true|false|new|class|public|private|final|static|double|null",
-    python: "def|return|for|in|while|if|elif|else|and|or|not|True|False|None|class|from|import|range|len|continue|break|lambda|sorted|sum|max|min|enumerate|zip"
+    js: "const|let|var|function|return|for|of|in|while|if|else|continue|break|true|false|null|undefined|new|class|this|constructor|get|typeof|Infinity|Math|Map|Set|Array"
   };
   function highlight(code, lang) {
-    const comment = lang === "python" ? "#[^\\n]*" : "\\/\\/[^\\n]*";
+    const comment = "\\/\\/[^\\n]*";
     const re = new RegExp(
       "(" + comment + ")|(\"(?:[^\"\\\\\\n]|\\\\.)*\"|'(?:[^'\\\\\\n]|\\\\.)*')|\\b(" + KW[lang] + ")\\b|\\b(\\d+)\\b",
       "g"
@@ -46,8 +46,9 @@
     return out + esc(code.slice(last));
   }
 
-  const LANG_LABEL = { cpp: "C++", java: "Java", python: "Python" };
+  const LANG_LABEL = { cpp: "C++", java: "Java", js: "JavaScript" };
   let lang = store.get("lang", "cpp");
+  if (!LANG_LABEL[lang]) lang = "cpp";
 
   function enhanceCodeBlock(block) {
     $$("pre", block).forEach(pre => {
@@ -266,7 +267,7 @@
     art.className = "card q";
     art.dataset.diff = q.difficulty;
     const tags = q.tags.map(t => `<span class="tag">${esc(t)}</span>`).join("");
-    const codeBlocks = ["cpp", "java", "python"].filter(l => q.code[l])
+    const codeBlocks = ["cpp", "java", "js"].filter(l => q.code[l])
       .map(l => `<pre data-lang="${l}"><code>${esc(q.code[l])}</code></pre>`).join("");
     art.innerHTML = `
       <div class="q-head">

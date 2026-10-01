@@ -1,5 +1,5 @@
 // Question bank for the "Important questions" section.
-// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,python}
+// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,js}
 window.QUESTIONS = [
   {
     id: "g-cookies",
@@ -29,14 +29,14 @@ window.QUESTIONS = [
         if (child < g.length && c >= g[child]) child++;
     return child;
 }`,
-      python: `def find_content_children(g, s):
-    g.sort()
-    s.sort()
-    child = 0
-    for c in s:
-        if child < len(g) and c >= g[child]:
-            child += 1
-    return child`
+      js: `function findContentChildren(g, s) {
+    g.sort((a, b) => a - b);                 // numeric sort, not the default string sort
+    s.sort((a, b) => a - b);
+    let child = 0;
+    for (const c of s)
+        if (child < g.length && c >= g[child]) child++;
+    return child;
+}`
     }
   },
   {
@@ -73,22 +73,17 @@ window.QUESTIONS = [
     }
     return true;
 }`,
-      python: `def lemonade_change(bills):
-    five = ten = 0
-    for b in bills:
-        if b == 5:
-            five += 1
-        elif b == 10:
-            if not five:
-                return False
-            five, ten = five - 1, ten + 1
-        elif ten and five:
-            ten, five = ten - 1, five - 1
-        elif five >= 3:
-            five -= 3
-        else:
-            return False
-    return True`
+      js: `function lemonadeChange(bills) {
+    let five = 0, ten = 0;
+    for (const b of bills) {
+        if (b === 5) five++;
+        else if (b === 10) { if (!five) return false; five--; ten++; }
+        else if (ten && five) { ten--; five--; }
+        else if (five >= 3) five -= 3;
+        else return false;
+    }
+    return true;
+}`
     }
   },
   {
@@ -115,8 +110,12 @@ window.QUESTIONS = [
         profit += Math.max(0, p[i] - p[i - 1]);
     return profit;
 }`,
-      python: `def max_profit(p):
-    return sum(max(0, p[i] - p[i - 1]) for i in range(1, len(p)))`
+      js: `function maxProfit(p) {
+    let profit = 0;
+    for (let i = 1; i < p.length; i++)
+        profit += Math.max(0, p[i] - p[i - 1]);
+    return profit;
+}`
     }
   },
   {
@@ -153,15 +152,17 @@ window.QUESTIONS = [
     }
     return units;
 }`,
-      python: `def maximum_units(boxes, truck_size):
-    units = 0
-    for count, per in sorted(boxes, key=lambda b: -b[1]):
-        take = min(truck_size, count)
-        units += take * per
-        truck_size -= take
-        if truck_size == 0:
-            break
-    return units`
+      js: `function maximumUnits(boxes, truckSize) {
+    boxes.sort((a, b) => b[1] - a[1]);
+    let units = 0;
+    for (const [count, per] of boxes) {
+        const take = Math.min(truckSize, count);
+        units += take * per;
+        truckSize -= take;
+        if (truckSize === 0) break;
+    }
+    return units;
+}`
     }
   },
   {
@@ -196,13 +197,16 @@ window.QUESTIONS = [
     }
     return k <= 0;
 }`,
-      python: `def can_place_flowers(f, k):
-    n = len(f)
-    for i in range(n):
-        if f[i] == 0 and (i == 0 or f[i - 1] == 0) and (i == n - 1 or f[i + 1] == 0):
-            f[i] = 1
-            k -= 1
-    return k <= 0`
+      js: `function canPlaceFlowers(f, k) {
+    const n = f.length;
+    for (let i = 0; i < n && k > 0; i++) {
+        if (f[i] === 0 && (i === 0 || f[i - 1] === 0) && (i === n - 1 || f[i + 1] === 0)) {
+            f[i] = 1;
+            k--;
+        }
+    }
+    return k <= 0;
+}`
     }
   },
   {
@@ -233,13 +237,14 @@ window.QUESTIONS = [
     }
     return true;
 }`,
-      python: `def can_jump(a):
-    reach = 0
-    for i, x in enumerate(a):
-        if i > reach:
-            return False
-        reach = max(reach, i + x)
-    return True`
+      js: `function canJump(a) {
+    let reach = 0;
+    for (let i = 0; i < a.length; i++) {
+        if (i > reach) return false;
+        reach = Math.max(reach, i + a[i]);
+    }
+    return true;
+}`
     }
   },
   {
@@ -270,13 +275,14 @@ window.QUESTIONS = [
     }
     return jumps;
 }`,
-      python: `def jump(a):
-    jumps = end = farthest = 0
-    for i in range(len(a) - 1):
-        farthest = max(farthest, i + a[i])
-        if i == end:
-            jumps, end = jumps + 1, farthest
-    return jumps`
+      js: `function jump(a) {
+    let jumps = 0, end = 0, farthest = 0;
+    for (let i = 0; i + 1 < a.length; i++) {
+        farthest = Math.max(farthest, i + a[i]);
+        if (i === end) { jumps++; end = farthest; }
+    }
+    return jumps;
+}`
     }
   },
   {
@@ -311,15 +317,16 @@ window.QUESTIONS = [
     }
     return total < 0 ? -1 : start;
 }`,
-      python: `def can_complete_circuit(gas, cost):
-    total = tank = start = 0
-    for i in range(len(gas)):
-        d = gas[i] - cost[i]
-        total += d
-        tank += d
-        if tank < 0:
-            start, tank = i + 1, 0
-    return -1 if total < 0 else start`
+      js: `function canCompleteCircuit(gas, cost) {
+    let total = 0, tank = 0, start = 0;
+    for (let i = 0; i < gas.length; i++) {
+        const d = gas[i] - cost[i];
+        total += d;
+        tank += d;
+        if (tank < 0) { start = i + 1; tank = 0; }
+    }
+    return total < 0 ? -1 : start;
+}`
     }
   },
   {
@@ -348,13 +355,13 @@ window.QUESTIONS = [
         if (iv[i][0] >= end) { kept++; end = iv[i][1]; }
     return iv.length - kept;
 }`,
-      python: `def erase_overlap_intervals(iv):
-    iv.sort(key=lambda x: x[1])
-    kept, end = 1, iv[0][1]
-    for s, e in iv[1:]:
-        if s >= end:
-            kept, end = kept + 1, e
-    return len(iv) - kept`
+      js: `function eraseOverlapIntervals(iv) {
+    iv.sort((a, b) => a[1] - b[1]);
+    let kept = 1, end = iv[0][1];
+    for (let i = 1; i < iv.length; i++)
+        if (iv[i][0] >= end) { kept++; end = iv[i][1]; }
+    return iv.length - kept;
+}`
     }
   },
   {
@@ -385,13 +392,13 @@ window.QUESTIONS = [
         if (b[0] > x) { arrows++; x = b[1]; }
     return arrows;
 }`,
-      python: `def find_min_arrow_shots(p):
-    p.sort(key=lambda b: b[1])
-    arrows, x = 1, p[0][1]
-    for s, e in p:
-        if s > x:
-            arrows, x = arrows + 1, e
-    return arrows`
+      js: `function findMinArrowShots(p) {
+    p.sort((a, b) => a[1] - b[1]);
+    let arrows = 1, x = p[0][1];
+    for (const [s, e] of p)
+        if (s > x) { arrows++; x = e; }
+    return arrows;
+}`
     }
   },
   {
@@ -425,14 +432,16 @@ window.QUESTIONS = [
     }
     return out.toArray(new int[0][]);
 }`,
-      python: `def merge(iv):
-    out = []
-    for s, e in sorted(iv):
-        if out and s <= out[-1][1]:
-            out[-1][1] = max(out[-1][1], e)
-        else:
-            out.append([s, e])
-    return out`
+      js: `function merge(iv) {
+    iv.sort((a, b) => a[0] - b[0]);
+    const out = [];
+    for (const [s, e] of iv) {
+        const last = out[out.length - 1];
+        if (last && s <= last[1]) last[1] = Math.max(last[1], e);
+        else out.push([s, e]);
+    }
+    return out;
+}`
     }
   },
   {
@@ -465,16 +474,18 @@ window.QUESTIONS = [
     }
     return ends.size();
 }`,
-      python: `import heapq
-
-def min_meeting_rooms(iv):
-    ends = []
-    for s, e in sorted(iv):
-        if ends and ends[0] <= s:
-            heapq.heapreplace(ends, e)
-        else:
-            heapq.heappush(ends, e)
-    return len(ends)`
+      js: `// JS has no built-in heap, so use the equivalent "two sorted arrays" sweep:
+// a meeting can reuse a room if it starts after the earliest unused end time.
+function minMeetingRooms(iv) {
+    const starts = iv.map(x => x[0]).sort((a, b) => a - b);
+    const ends = iv.map(x => x[1]).sort((a, b) => a - b);
+    let rooms = 0, e = 0;
+    for (const s of starts) {
+        if (s >= ends[e]) e++;      // a room freed up: reuse it
+        else rooms++;               // all busy: open a new room
+    }
+    return rooms;
+}`
     }
   },
   {
@@ -509,15 +520,16 @@ def min_meeting_rooms(iv):
     }
     return boats;
 }`,
-      python: `def num_rescue_boats(p, limit):
-    p.sort()
-    i, j, boats = 0, len(p) - 1, 0
-    while i <= j:
-        if p[i] + p[j] <= limit:
-            i += 1
-        j -= 1
-        boats += 1
-    return boats`
+      js: `function numRescueBoats(p, limit) {
+    p.sort((a, b) => a - b);
+    let i = 0, j = p.length - 1, boats = 0;
+    while (i <= j) {
+        if (p[i] + p[j] <= limit) i++;
+        j--;
+        boats++;
+    }
+    return boats;
+}`
     }
   },
   {
@@ -554,15 +566,17 @@ def min_meeting_rooms(iv):
     }
     return parts;
 }`,
-      python: `def partition_labels(s):
-    last = {c: i for i, c in enumerate(s)}
-    parts, start, end = [], 0, 0
-    for i, c in enumerate(s):
-        end = max(end, last[c])
-        if i == end:
-            parts.append(end - start + 1)
-            start = i + 1
-    return parts`
+      js: `function partitionLabels(s) {
+    const last = {};
+    for (let i = 0; i < s.length; i++) last[s[i]] = i;
+    const parts = [];
+    let start = 0, end = 0;
+    for (let i = 0; i < s.length; i++) {
+        end = Math.max(end, last[s[i]]);
+        if (i === end) { parts.push(end - start + 1); start = i + 1; }
+    }
+    return parts;
+}`
     }
   },
   {
@@ -590,13 +604,13 @@ def min_meeting_rooms(iv):
     for (int f : freq) if (f == maxF) cntMax++;
     return Math.max(tasks.length, (maxF - 1) * (n + 1) + cntMax);
 }`,
-      python: `from collections import Counter
-
-def least_interval(tasks, n):
-    freq = Counter(tasks)
-    max_f = max(freq.values())
-    cnt_max = sum(1 for f in freq.values() if f == max_f)
-    return max(len(tasks), (max_f - 1) * (n + 1) + cnt_max)`
+      js: `function leastInterval(tasks, n) {
+    const freq = new Array(26).fill(0);
+    for (const t of tasks) freq[t.charCodeAt(0) - 65]++;
+    const maxF = Math.max(...freq);
+    const cntMax = freq.filter(f => f === maxF).length;
+    return Math.max(tasks.length, (maxF - 1) * (n + 1) + cntMax);
+}`
     }
   },
   {
@@ -640,21 +654,22 @@ def least_interval(tasks, n):
     }
     return true;
 }`,
-      python: `from collections import Counter
-
-def is_n_straight_hand(hand, W):
-    if len(hand) % W:
-        return False
-    cnt = Counter(hand)
-    for x in sorted(cnt):
-        need = cnt[x]
-        if need == 0:
-            continue
-        for k in range(x, x + W):
-            if cnt[k] < need:
-                return False
-            cnt[k] -= need
-    return True`
+      js: `function isNStraightHand(hand, W) {
+    if (hand.length % W) return false;
+    const cnt = new Map();
+    for (const x of hand) cnt.set(x, (cnt.get(x) || 0) + 1);
+    const keys = [...cnt.keys()].sort((a, b) => a - b);
+    for (const x of keys) {
+        const need = cnt.get(x);
+        if (need === 0) continue;
+        for (let k = x; k < x + W; k++) {
+            const have = cnt.get(k) || 0;
+            if (have < need) return false;
+            cnt.set(k, have - need);
+        }
+    }
+    return true;
+}`
     }
   },
   {
@@ -691,19 +706,17 @@ def is_n_straight_hand(hand, W):
     }
     return lo == 0;
 }`,
-      python: `def check_valid_string(s):
-    lo = hi = 0
-    for c in s:
-        if c == "(":
-            lo, hi = lo + 1, hi + 1
-        elif c == ")":
-            lo, hi = lo - 1, hi - 1
-        else:
-            lo, hi = lo - 1, hi + 1
-        if hi < 0:
-            return False
-        lo = max(lo, 0)
-    return lo == 0`
+      js: `function checkValidString(s) {
+    let lo = 0, hi = 0;
+    for (const c of s) {
+        if (c === "(") { lo++; hi++; }
+        else if (c === ")") { lo--; hi--; }
+        else { lo--; hi++; }
+        if (hi < 0) return false;
+        lo = Math.max(lo, 0);
+    }
+    return lo === 0;
+}`
     }
   },
   {
@@ -746,15 +759,18 @@ def is_n_straight_hand(hand, W):
     }
     return total;
 }`,
-      python: `def fractional_knapsack(val, wt, W):
-    total = 0.0
-    for v, w in sorted(zip(val, wt), key=lambda it: it[0] / it[1], reverse=True):
-        if W == 0:
-            break
-        take = min(W, w)
-        total += v * take / w
-        W -= take
-    return total`
+      js: `function fractionalKnapsack(val, wt, W) {
+    const idx = val.map((_, i) => i)
+        .sort((a, b) => val[b] / wt[b] - val[a] / wt[a]);
+    let total = 0;
+    for (const i of idx) {
+        if (W === 0) break;
+        const take = Math.min(W, wt[i]);
+        total += val[i] * take / wt[i];
+        W -= take;
+    }
+    return total;
+}`
     }
   },
   {
@@ -790,16 +806,14 @@ def is_n_straight_hand(hand, W):
     for (int x : c) sum += x;
     return sum;
 }`,
-      python: `def candy(r):
-    n = len(r)
-    c = [1] * n
-    for i in range(1, n):
-        if r[i] > r[i - 1]:
-            c[i] = c[i - 1] + 1
-    for i in range(n - 2, -1, -1):
-        if r[i] > r[i + 1]:
-            c[i] = max(c[i], c[i + 1] + 1)
-    return sum(c)`
+      js: `function candy(r) {
+    const n = r.length, c = new Array(n).fill(1);
+    for (let i = 1; i < n; i++)
+        if (r[i] > r[i - 1]) c[i] = c[i - 1] + 1;
+    for (let i = n - 2; i >= 0; i--)
+        if (r[i] > r[i + 1]) c[i] = Math.max(c[i], c[i + 1] + 1);
+    return c.reduce((s, x) => s + x, 0);
+}`
     }
   },
   {
@@ -842,19 +856,49 @@ def is_n_straight_hand(hand, W):
     }
     return w;
 }`,
-      python: `import heapq
+      js: `// JS has no built-in priority queue, so keep a small one handy:
+class MinHeap {
+    constructor() { this.a = []; }
+    get size() { return this.a.length; }
+    push(x) {
+        const a = this.a;
+        a.push(x);
+        for (let i = a.length - 1; i > 0; ) {
+            const p = (i - 1) >> 1;
+            if (a[p] <= a[i]) break;
+            [a[p], a[i]] = [a[i], a[p]];
+            i = p;
+        }
+    }
+    pop() {
+        const a = this.a, top = a[0], last = a.pop();
+        if (a.length) {
+            a[0] = last;
+            for (let i = 0; ; ) {
+                const l = 2 * i + 1, r = l + 1;
+                let m = i;
+                if (l < a.length && a[l] < a[m]) m = l;
+                if (r < a.length && a[r] < a[m]) m = r;
+                if (m === i) break;
+                [a[m], a[i]] = [a[i], a[m]];
+                i = m;
+            }
+        }
+        return top;
+    }
+}
 
-def find_maximized_capital(k, w, profits, capital):
-    proj = sorted(zip(capital, profits))
-    heap, i = [], 0
-    for _ in range(k):
-        while i < len(proj) and proj[i][0] <= w:
-            heapq.heappush(heap, -proj[i][1])     # max-heap via negation
-            i += 1
-        if not heap:
-            break
-        w -= heapq.heappop(heap)
-    return w`
+function findMaximizedCapital(k, w, profits, capital) {
+    const proj = capital.map((c, i) => [c, profits[i]]).sort((a, b) => a[0] - b[0]);
+    const pq = new MinHeap();                     // store -profit to get a max-heap
+    let i = 0;
+    while (k-- > 0) {
+        while (i < proj.length && proj[i][0] <= w) pq.push(-proj[i++][1]);
+        if (pq.size === 0) break;
+        w -= pq.pop();
+    }
+    return w;
+}`
     }
   }
 ];

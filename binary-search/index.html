@@ -31,7 +31,7 @@
         <div class="lang-switch" role="group" aria-label="Code language">
           <button data-lang="cpp" class="active">C++</button>
           <button data-lang="java">Java</button>
-          <button data-lang="python">Python</button>
+          <button data-lang="js">JavaScript</button>
         </div>
         <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
       </div>
@@ -114,7 +114,7 @@
       <div class="callout">
         <strong>Computing mid safely:</strong> <code>(lo + hi) / 2</code> can overflow when <code>lo + hi</code> exceeds
         the int range (a real bug that sat in Java’s standard library for years). Use <code>lo + (hi - lo) / 2</code>.
-        Python integers don’t overflow, so <code>(lo + hi) // 2</code> is fine there.
+        In JavaScript there is no int overflow below 2<sup>53</sup>, but <code>/</code> is <em>floating-point</em> division: always write <code>Math.floor((lo + hi) / 2)</code> — <code>(lo + hi) / 2</code> alone gives 2.5 and <code>a[2.5]</code> is <code>undefined</code>.
       </div>
     </section>
 
@@ -149,17 +149,16 @@
     }
     return -1;
 }</code></pre>
-<pre data-lang="python"><code>def binary_search(a, target):
-    lo, hi = 0, len(a) - 1              # search [lo, hi]
-    while lo &lt;= hi:                     # range not empty
-        mid = (lo + hi) // 2
-        if a[mid] == target:
-            return mid
-        if a[mid] &lt; target:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return -1</code></pre>
+<pre data-lang="js"><code>function binarySearch(a, target) {
+    let lo = 0, hi = a.length - 1;            // search [lo, hi]
+    while (lo &lt;= hi) {                        // range not empty
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] === target) return mid;
+        if (a[mid] &lt; target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}</code></pre>
           </div>
         </article>
 
@@ -186,15 +185,15 @@
     }
     return lo;                          // == hi
 }</code></pre>
-<pre data-lang="python"><code>def lower_bound(a, t):
-    lo, hi = 0, len(a)                  # answer in [lo, hi]
-    while lo &lt; hi:
-        mid = (lo + hi) // 2
-        if a[mid] &gt;= t:
-            hi = mid                    # mid could be the answer
-        else:
-            lo = mid + 1                # mid is definitely not
-    return lo                           # == hi</code></pre>
+<pre data-lang="js"><code>function lowerBound(a, t) {
+    let lo = 0, hi = a.length;                // answer in [lo, hi]
+    while (lo &lt; hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (a[mid] &gt;= t) hi = mid;            // mid could be the answer
+        else lo = mid + 1;                    // mid is definitely not
+    }
+    return lo;                                // === hi
+}</code></pre>
           </div>
           <p class="muted small"><strong>Upper bound</strong> (first <code>a[i] &gt; t</code>) is the same with <code>&gt;</code>.
             Count of <code>t</code> = <code>upper − lower</code>. Last index of <code>t</code> = <code>upper − 1</code>.</p>
@@ -223,15 +222,15 @@ long firstTrue(long lo, long hi, LongPredicate ok) {
     }
     return lo;
 }</code></pre>
-<pre data-lang="python"><code># smallest x in [lo, hi] with ok(x) == True
-def first_true(lo, hi, ok):
-    while lo &lt; hi:
-        mid = (lo + hi) // 2
-        if ok(mid):
-            hi = mid
-        else:
-            lo = mid + 1
-    return lo</code></pre>
+<pre data-lang="js"><code>// smallest x in [lo, hi] with ok(x) === true
+function firstTrue(lo, hi, ok) {
+    while (lo &lt; hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (ok(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}</code></pre>
           </div>
         </article>
 
@@ -252,13 +251,12 @@ return lo;</code></pre>
     else hi = mid - 1;
 }
 return lo;</code></pre>
-<pre data-lang="python"><code>while lo &lt; hi:
-    mid = (lo + hi + 1) // 2                  # round UP
-    if ok(mid):
-        lo = mid
-    else:
-        hi = mid - 1
-return lo</code></pre>
+<pre data-lang="js"><code>while (lo &lt; hi) {
+    const mid = Math.floor((lo + hi + 1) / 2);   // round UP
+    if (ok(mid)) lo = mid;
+    else hi = mid - 1;
+}
+return lo;</code></pre>
           </div>
           <p class="muted small">Rule: if a branch does <code>lo = mid</code>, round mid up. If it does <code>hi = mid</code>, round down.</p>
         </article>
@@ -278,12 +276,27 @@ int i = Arrays.binarySearch(a, t);
 // i &lt; 0   → not found, insertion point = -(i + 1)
 // Collections.binarySearch(list, t) works the same for lists.
 // TreeSet / TreeMap: ceiling(t) = smallest &gt;= t, floor(t) = largest &lt;= t</code></pre>
-<pre data-lang="python"><code>from bisect import bisect_left, bisect_right, insort
-i = bisect_left(a, t)     # first index with a[i] &gt;= t  (lower bound)
-j = bisect_right(a, t)    # first index with a[j] &gt; t   (upper bound)
-count = j - i             # occurrences of t
-insort(a, t)              # insert keeping a sorted
-# Python 3.10+: bisect_left(a, t, key=func)</code></pre>
+<pre data-lang="js"><code>// JavaScript has NO built-in binary search:
+// indexOf, includes and findIndex are all O(n) linear scans.
+// Keep these two helpers handy:
+function lowerBound(a, t) {          // first index with a[i] &gt;= t
+    let lo = 0, hi = a.length;
+    while (lo &lt; hi) {
+        const mid = (lo + hi) &gt;&gt;&gt; 1;  // unsigned shift = floor(÷2) for indices
+        if (a[mid] &lt; t) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+}
+function upperBound(a, t) {          // first index with a[i] &gt; t
+    let lo = 0, hi = a.length;
+    while (lo &lt; hi) {
+        const mid = (lo + hi) &gt;&gt;&gt; 1;
+        if (a[mid] &lt;= t) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+}
+const count = upperBound(a, t) - lowerBound(a, t);   // occurrences of t
+a.splice(lowerBound(a, t), 0, t);                    // insert keeping a sorted</code></pre>
       </div>
     </section>
 
@@ -380,7 +393,7 @@ insort(a, t)              # insert keeping a sorted
         <div class="tip card"><div class="tip-ico">🔢</div><h3>Real numbers</h3>
           <p>For doubles, loop a fixed ~100 times (or until <code>hi − lo &lt; 1e-9</code>) instead of comparing for equality.</p></div>
         <div class="tip card"><div class="tip-ico">📚</div><h3>Know your library</h3>
-          <p><code>lower_bound</code>, <code>bisect_left</code>, <code>TreeMap.ceilingKey</code> save time and bugs in contests.</p></div>
+          <p><code>lower_bound</code> and <code>TreeMap.ceilingKey</code> save time and bugs in contests. JavaScript has none — keep a tested <code>lowerBound</code> helper ready.</p></div>
         <div class="tip card"><div class="tip-ico">🗣️</div><h3>Trace out loud</h3>
           <p>In interviews, dry-run 2–3 iterations on the example writing <code>lo / mid / hi</code>. It catches off-by-ones instantly.</p></div>
       </div>

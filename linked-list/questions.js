@@ -1,5 +1,5 @@
 // Question bank for the "Important questions" section.
-// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,python}
+// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,js}
 // Solutions use LeetCode's ListNode { val, next } definition.
 window.QUESTIONS = [
   {
@@ -34,13 +34,16 @@ window.QUESTIONS = [
     }
     return prev;
 }`,
-      python: `def reverse_list(head):
-    prev, curr = None, head
-    while curr:
-        nxt = curr.next
-        curr.next = prev
-        prev, curr = curr, nxt
-    return prev`
+      js: `function reverseList(head) {
+    let prev = null, curr = head;
+    while (curr) {
+        const next = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = next;
+    }
+    return prev;
+}`
     }
   },
   {
@@ -71,12 +74,14 @@ window.QUESTIONS = [
     }
     return slow;
 }`,
-      python: `def middle_node(head):
-    slow = fast = head
-    while fast and fast.next:
-        slow = slow.next
-        fast = fast.next.next
-    return slow`
+      js: `function middleNode(head) {
+    let slow = head, fast = head;
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}`
     }
   },
   {
@@ -111,16 +116,17 @@ window.QUESTIONS = [
     tail.next = (a != null) ? a : b;
     return dummy.next;
 }`,
-      python: `def merge_two_lists(a, b):
-    dummy = tail = ListNode(0)
-    while a and b:
-        if a.val <= b.val:
-            tail.next, a = a, a.next
-        else:
-            tail.next, b = b, b.next
-        tail = tail.next
-    tail.next = a or b
-    return dummy.next`
+      js: `function mergeTwoLists(a, b) {
+    const dummy = new ListNode(0);
+    let tail = dummy;
+    while (a && b) {
+        if (a.val <= b.val) { tail.next = a; a = a.next; }
+        else                { tail.next = b; b = b.next; }
+        tail = tail.next;
+    }
+    tail.next = a || b;
+    return dummy.next;
+}`
     }
   },
   {
@@ -153,14 +159,15 @@ window.QUESTIONS = [
     }
     return false;
 }`,
-      python: `def has_cycle(head):
-    slow = fast = head
-    while fast and fast.next:
-        slow = slow.next
-        fast = fast.next.next
-        if slow is fast:
-            return True
-    return False`
+      js: `function hasCycle(head) {
+    let slow = head, fast = head;
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow === fast) return true;
+    }
+    return false;
+}`
     }
   },
   {
@@ -191,14 +198,14 @@ window.QUESTIONS = [
     }
     return head;
 }`,
-      python: `def delete_duplicates(head):
-    cur = head
-    while cur and cur.next:
-        if cur.val == cur.next.val:
-            cur.next = cur.next.next
-        else:
-            cur = cur.next
-    return head`
+      js: `function deleteDuplicates(head) {
+    let cur = head;
+    while (cur && cur.next) {
+        if (cur.val === cur.next.val) cur.next = cur.next.next;
+        else cur = cur.next;
+    }
+    return head;
+}`
     }
   },
   {
@@ -233,14 +240,15 @@ window.QUESTIONS = [
     }
     return dummy.next;
 }`,
-      python: `def remove_elements(head, val):
-    dummy = prev = ListNode(0, head)
-    while prev.next:
-        if prev.next.val == val:
-            prev.next = prev.next.next
-        else:
-            prev = prev.next
-    return dummy.next`
+      js: `function removeElements(head, val) {
+    const dummy = new ListNode(0, head);
+    let prev = dummy;
+    while (prev.next) {
+        if (prev.next.val === val) prev.next = prev.next.next;
+        else prev = prev.next;
+    }
+    return dummy.next;
+}`
     }
   },
   {
@@ -283,21 +291,20 @@ window.QUESTIONS = [
         if (l.val != r.val) return false;
     return true;
 }`,
-      python: `def is_palindrome(head):
-    slow = fast = head
-    while fast and fast.next:
-        slow, fast = slow.next, fast.next.next
-    prev = None                                # reverse second half
-    while slow:
-        nxt = slow.next
-        slow.next = prev
-        prev, slow = slow, nxt
-    left, right = head, prev
-    while right:
-        if left.val != right.val:
-            return False
-        left, right = left.next, right.next
-    return True`
+      js: `function isPalindrome(head) {
+    let slow = head, fast = head;
+    while (fast && fast.next) { slow = slow.next; fast = fast.next.next; }
+    let prev = null;                           // reverse second half
+    while (slow) {
+        const next = slow.next;
+        slow.next = prev;
+        prev = slow;
+        slow = next;
+    }
+    for (let l = head, r = prev; r; l = l.next, r = r.next)
+        if (l.val !== r.val) return false;
+    return true;
+}`
     }
   },
   {
@@ -328,12 +335,14 @@ window.QUESTIONS = [
     }
     return a;
 }`,
-      python: `def get_intersection_node(head_a, head_b):
-    a, b = head_a, head_b
-    while a is not b:
-        a = a.next if a else head_b
-        b = b.next if b else head_a
-    return a`
+      js: `function getIntersectionNode(headA, headB) {
+    let a = headA, b = headB;
+    while (a !== b) {
+        a = a ? a.next : headB;
+        b = b ? b.next : headA;
+    }
+    return a;
+}`
     }
   },
   {
@@ -366,15 +375,14 @@ window.QUESTIONS = [
     slow.next = slow.next.next;
     return dummy.next;
 }`,
-      python: `def remove_nth_from_end(head, n):
-    dummy = ListNode(0, head)
-    fast = slow = dummy
-    for _ in range(n + 1):
-        fast = fast.next
-    while fast:
-        fast, slow = fast.next, slow.next
-    slow.next = slow.next.next
-    return dummy.next`
+      js: `function removeNthFromEnd(head, n) {
+    const dummy = new ListNode(0, head);
+    let fast = dummy, slow = dummy;
+    for (let i = 0; i <= n; i++) fast = fast.next;
+    while (fast) { fast = fast.next; slow = slow.next; }
+    slow.next = slow.next.next;
+    return dummy.next;
+}`
     }
   },
   {
@@ -415,19 +423,19 @@ window.QUESTIONS = [
     }
     return dummy.next;
 }`,
-      python: `def add_two_numbers(a, b):
-    dummy = tail = ListNode(0)
-    carry = 0
-    while a or b or carry:
-        s = carry
-        if a:
-            s, a = s + a.val, a.next
-        if b:
-            s, b = s + b.val, b.next
-        tail.next = ListNode(s % 10)
-        tail = tail.next
-        carry = s // 10
-    return dummy.next`
+      js: `function addTwoNumbers(a, b) {
+    const dummy = new ListNode(0);
+    let tail = dummy, carry = 0;
+    while (a || b || carry) {
+        let sum = carry;
+        if (a) { sum += a.val; a = a.next; }
+        if (b) { sum += b.val; b = b.next; }
+        tail.next = new ListNode(sum % 10);
+        tail = tail.next;
+        carry = Math.floor(sum / 10);
+    }
+    return dummy.next;
+}`
     }
   },
   {
@@ -466,18 +474,19 @@ window.QUESTIONS = [
     odd.next = evenHead;
     return head;
 }`,
-      python: `def odd_even_list(head):
-    if not head:
-        return head
-    odd, even = head, head.next
-    even_head = even
-    while even and even.next:
-        odd.next = even.next
-        odd = odd.next
-        even.next = odd.next
-        even = even.next
-    odd.next = even_head
-    return head`
+      js: `function oddEvenList(head) {
+    if (!head) return head;
+    let odd = head, even = head.next;
+    const evenHead = even;
+    while (even && even.next) {
+        odd.next = even.next;
+        odd = odd.next;
+        even.next = odd.next;
+        even = even.next;
+    }
+    odd.next = evenHead;
+    return head;
+}`
     }
   },
   {
@@ -518,16 +527,19 @@ window.QUESTIONS = [
     }
     return null;
 }`,
-      python: `def detect_cycle(head):
-    slow = fast = head
-    while fast and fast.next:
-        slow, fast = slow.next, fast.next.next
-        if slow is fast:
-            p = head
-            while p is not slow:
-                p, slow = p.next, slow.next
-            return p
-    return None`
+      js: `function detectCycle(head) {
+    let slow = head, fast = head;
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow === fast) {
+            let p = head;
+            while (p !== slow) { p = p.next; slow = slow.next; }
+            return p;
+        }
+    }
+    return null;
+}`
     }
   },
   {
@@ -580,24 +592,25 @@ window.QUESTIONS = [
         a = an; b = bn;
     }
 }`,
-      python: `def reorder_list(head):
-    if not head or not head.next:
-        return
-    slow = fast = head
-    while fast.next and fast.next.next:
-        slow, fast = slow.next, fast.next.next
-    second, slow.next = slow.next, None         # cut
-    prev = None
-    while second:                               # reverse 2nd half
-        nxt = second.next
-        second.next = prev
-        prev, second = second, nxt
-    a, b = head, prev
-    while b:                                    # weave
-        an, bn = a.next, b.next
-        a.next = b
-        b.next = an
-        a, b = an, bn`
+      js: `function reorderList(head) {
+    if (!head || !head.next) return;
+    let slow = head, fast = head;
+    while (fast.next && fast.next.next) { slow = slow.next; fast = fast.next.next; }
+    let second = slow.next, prev = null;
+    slow.next = null;                           // cut
+    while (second) {                            // reverse 2nd half
+        const next = second.next;
+        second.next = prev;
+        prev = second;
+        second = next;
+    }
+    for (let a = head, b = prev; b; ) {         // weave
+        const an = a.next, bn = b.next;
+        a.next = b;
+        b.next = an;
+        a = an; b = bn;
+    }
+}`
     }
   },
   {
@@ -640,22 +653,19 @@ window.QUESTIONS = [
     newTail.next = null;                       // cut
     return newHead;
 }`,
-      python: `def rotate_right(head, k):
-    if not head or not head.next:
-        return head
-    n, tail = 1, head
-    while tail.next:
-        tail, n = tail.next, n + 1
-    k %= n
-    if k == 0:
-        return head
-    tail.next = head                           # make a ring
-    new_tail = head
-    for _ in range(n - k - 1):
-        new_tail = new_tail.next
-    new_head = new_tail.next
-    new_tail.next = None                       # cut
-    return new_head`
+      js: `function rotateRight(head, k) {
+    if (!head || !head.next) return head;
+    let n = 1, tail = head;
+    while (tail.next) { tail = tail.next; n++; }
+    k %= n;
+    if (k === 0) return head;
+    tail.next = head;                          // make a ring
+    let newTail = head;
+    for (let i = 0; i < n - k - 1; i++) newTail = newTail.next;
+    const newHead = newTail.next;
+    newTail.next = null;                       // cut
+    return newHead;
+}`
     }
   },
   {
@@ -698,17 +708,19 @@ window.QUESTIONS = [
     }
     return dummy.next;
 }`,
-      python: `def reverse_between(head, left, right):
-    dummy = prev = ListNode(0, head)
-    for _ in range(left - 1):
-        prev = prev.next
-    curr = prev.next
-    for _ in range(right - left):
-        move = curr.next
-        curr.next = move.next
-        move.next = prev.next
-        prev.next = move
-    return dummy.next`
+      js: `function reverseBetween(head, left, right) {
+    const dummy = new ListNode(0, head);
+    let prev = dummy;
+    for (let i = 1; i < left; i++) prev = prev.next;
+    const curr = prev.next;
+    for (let i = 0; i < right - left; i++) {
+        const move = curr.next;
+        curr.next = move.next;
+        move.next = prev.next;
+        prev.next = move;
+    }
+    return dummy.next;
+}`
     }
   },
   {
@@ -759,23 +771,25 @@ private ListNode mergeLists(ListNode a, ListNode b) {
     tail.next = (a != null) ? a : b;
     return dummy.next;
 }`,
-      python: `def sort_list(head):
-    if not head or not head.next:
-        return head
-    slow, fast = head, head.next
-    while fast and fast.next:
-        slow, fast = slow.next, fast.next.next
-    mid, slow.next = slow.next, None
-    a, b = sort_list(head), sort_list(mid)
-    dummy = tail = ListNode(0)
-    while a and b:
-        if a.val <= b.val:
-            tail.next, a = a, a.next
-        else:
-            tail.next, b = b, b.next
-        tail = tail.next
-    tail.next = a or b
-    return dummy.next`
+      js: `function mergeLists(a, b) {
+    const dummy = new ListNode(0);
+    let tail = dummy;
+    while (a && b) {
+        if (a.val <= b.val) { tail.next = a; a = a.next; }
+        else                { tail.next = b; b = b.next; }
+        tail = tail.next;
+    }
+    tail.next = a || b;
+    return dummy.next;
+}
+function sortList(head) {
+    if (!head || !head.next) return head;
+    let slow = head, fast = head.next;
+    while (fast && fast.next) { slow = slow.next; fast = fast.next.next; }
+    const mid = slow.next;
+    slow.next = null;
+    return mergeLists(sortList(head), sortList(mid));
+}`
     }
   },
   {
@@ -810,18 +824,16 @@ public Node copyRandomList(Node head) {
     }
     return copy.get(head);
 }`,
-      python: `def copy_random_list(head):
-    copy = {None: None}
-    p = head
-    while p:
-        copy[p] = Node(p.val)
-        p = p.next
-    p = head
-    while p:
-        copy[p].next = copy[p.next]
-        copy[p].random = copy[p.random]
-        p = p.next
-    return copy[head]`
+      js: `// class Node { constructor(val, next = null, random = null) { ... } }
+function copyRandomList(head) {
+    const copy = new Map([[null, null]]);
+    for (let p = head; p; p = p.next) copy.set(p, new Node(p.val));
+    for (let p = head; p; p = p.next) {
+        copy.get(p).next = copy.get(p.next);
+        copy.get(p).random = copy.get(p.random);
+    }
+    return copy.get(head);
+}`
     }
   },
   {
@@ -904,47 +916,40 @@ public:
         pushFront(n); map.put(key, n);
     }
 }`,
-      python: `class DNode:
-    def __init__(self, key=0, val=0):
-        self.key, self.val = key, val
-        self.prev = self.next = None
-
-class LRUCache:
-    def __init__(self, capacity):
-        self.cap, self.map = capacity, {}
-        self.head, self.tail = DNode(), DNode()          # sentinels
-        self.head.next, self.tail.prev = self.tail, self.head
-
-    def _unlink(self, n):
-        n.prev.next, n.next.prev = n.next, n.prev
-
-    def _push_front(self, n):
-        n.next, n.prev = self.head.next, self.head
-        self.head.next.prev = n
-        self.head.next = n
-
-    def get(self, key):
-        n = self.map.get(key)
-        if not n:
-            return -1
-        self._unlink(n)
-        self._push_front(n)
-        return n.val
-
-    def put(self, key, value):
-        if key in self.map:
-            n = self.map[key]
-            n.val = value
-            self._unlink(n)
-            self._push_front(n)
-            return
-        if len(self.map) == self.cap:
-            lru = self.tail.prev
-            self._unlink(lru)
-            del self.map[lru.key]
-        n = DNode(key, value)
-        self._push_front(n)
-        self.map[key] = n`
+      js: `// Shortcut: a JS Map remembers insertion order, so delete + set moves a key to the end
+// and map.keys().next().value is the least recently used. Below is the classic DLL version.
+class DNode {
+    constructor(key = 0, val = 0) { this.key = key; this.val = val; this.prev = this.next = null; }
+}
+class LRUCache {
+    constructor(capacity) {
+        this.cap = capacity;
+        this.map = new Map();
+        this.head = new DNode(); this.tail = new DNode();     // sentinels
+        this.head.next = this.tail; this.tail.prev = this.head;
+    }
+    unlink(n) { n.prev.next = n.next; n.next.prev = n.prev; }
+    pushFront(n) {
+        n.next = this.head.next; n.prev = this.head;
+        this.head.next.prev = n; this.head.next = n;
+    }
+    get(key) {
+        const n = this.map.get(key);
+        if (!n) return -1;
+        this.unlink(n); this.pushFront(n);
+        return n.val;
+    }
+    put(key, value) {
+        let n = this.map.get(key);
+        if (n) { n.val = value; this.unlink(n); this.pushFront(n); return; }
+        if (this.map.size === this.cap) {
+            const lru = this.tail.prev;
+            this.unlink(lru); this.map.delete(lru.key);
+        }
+        n = new DNode(key, value);
+        this.pushFront(n); this.map.set(key, n);
+    }
+}`
     }
   },
   {
@@ -1003,25 +1008,27 @@ class LRUCache:
     }
     return dummy.next;
 }`,
-      python: `def reverse_k_group(head, k):
-    dummy = ListNode(0, head)
-    group_prev = dummy
-    while True:
-        kth = group_prev
-        for _ in range(k):
-            kth = kth.next if kth else None
-        if not kth:
-            break
-        group_next = kth.next
-        prev, curr = group_next, group_prev.next
-        while curr is not group_next:
-            nxt = curr.next
-            curr.next = prev
-            prev, curr = curr, nxt
-        first = group_prev.next                 # becomes the group's tail
-        group_prev.next = kth
-        group_prev = first
-    return dummy.next`
+      js: `function reverseKGroup(head, k) {
+    const dummy = new ListNode(0, head);
+    let groupPrev = dummy;
+    while (true) {
+        let kth = groupPrev;
+        for (let i = 0; i < k && kth; i++) kth = kth.next;
+        if (!kth) break;
+        const groupNext = kth.next;
+        let prev = groupNext, curr = groupPrev.next;
+        while (curr !== groupNext) {
+            const next = curr.next;
+            curr.next = prev;
+            prev = curr;
+            curr = next;
+        }
+        const first = groupPrev.next;           // becomes the group's tail
+        groupPrev.next = kth;
+        groupPrev = first;
+    }
+    return dummy.next;
+}`
     }
   },
   {
@@ -1061,18 +1068,25 @@ class LRUCache:
     }
     return dummy.next;
 }`,
-      python: `import heapq
-
-def merge_k_lists(lists):
-    heap = [(l.val, i, l) for i, l in enumerate(lists) if l]
-    heapq.heapify(heap)                # i breaks ties (nodes aren't comparable)
-    dummy = tail = ListNode(0)
-    while heap:
-        _, i, node = heapq.heappop(heap)
-        tail.next = tail = node
-        if node.next:
-            heapq.heappush(heap, (node.next.val, i, node.next))
-    return dummy.next`
+      js: `// JS has no built-in heap, so merge lists in pairs (divide & conquer): also O(N log k)
+function mergeTwo(a, b) {
+    const dummy = new ListNode(0);
+    let tail = dummy;
+    while (a && b) {
+        if (a.val <= b.val) { tail.next = a; a = a.next; }
+        else                { tail.next = b; b = b.next; }
+        tail = tail.next;
+    }
+    tail.next = a || b;
+    return dummy.next;
+}
+function mergeKLists(lists) {
+    if (!lists.length) return null;
+    for (let step = 1; step < lists.length; step *= 2)
+        for (let i = 0; i + step < lists.length; i += step * 2)
+            lists[i] = mergeTwo(lists[i], lists[i + step]);
+    return lists[0];
+}`
     }
   }
 ];

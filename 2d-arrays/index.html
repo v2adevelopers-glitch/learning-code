@@ -30,7 +30,7 @@
         <div class="lang-switch" role="group" aria-label="Code language">
           <button data-lang="cpp" class="active">C++</button>
           <button data-lang="java">Java</button>
-          <button data-lang="python">Python</button>
+          <button data-lang="js">JavaScript</button>
         </div>
         <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
       </div>
@@ -97,24 +97,24 @@ int[][] grid = new int[R][C];
 
 int rows = grid.length;
 int cols = grid[0].length;</code></pre>
-<pre data-lang="python"><code># Fixed values
-a = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+<pre data-lang="js"><code>// Fixed values
+const a = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]];
 
-# Dynamic size — use a comprehension!
-R, C = 3, 4
-grid = [[0] * C for _ in range(R)]
+// Dynamic size — build each row separately!
+const R = 3, C = 4;
+const grid = Array.from({ length: R }, () =&gt; new Array(C).fill(0));
 
-# WRONG: every row is the SAME list object
-bad = [[0] * C] * R
-bad[0][0] = 9   # changes column 0 of every row!
+// WRONG: every row is the SAME array object
+const bad = new Array(R).fill(new Array(C).fill(0));
+bad[0][0] = 9;   // changes column 0 of every row!
 
-rows, cols = len(grid), len(grid[0])</code></pre>
+const rows = grid.length, cols = grid[0].length;</code></pre>
       </div>
 
       <h3 class="sub">How it sits in memory</h3>
       <div class="grid-2">
         <div class="card">
-          <p>Memory is one long line, so a 2D array must be <em>flattened</em>. C, C++, Java, Python (NumPy default)
+          <p>Memory is one long line, so a 2D array must be <em>flattened</em>. C, C++, Java and JavaScript (typed arrays)
             all use <strong>row-major</strong> order: row 0 first, then row 1, and so on.</p>
           <div class="formula">index(i, j) = i × C + j</div>
           <div class="formula">i = k / C, &nbsp; j = k % C</div>
@@ -132,7 +132,7 @@ rows, cols = len(grid), len(grid[0])</code></pre>
       </div>
 
       <h3 class="sub">Jagged arrays</h3>
-      <p>In Java, Python and C++ (<code>vector&lt;vector&lt;int&gt;&gt;</code>), each row is its own array, so rows can have
+      <p>In Java, JavaScript and C++ (<code>vector&lt;vector&lt;int&gt;&gt;</code>), each row is its own array, so rows can have
         <strong>different lengths</strong> (e.g. Pascal’s triangle). Always use <code>grid[i].length</code> for the inner loop
         if rows may differ.</p>
     </section>
@@ -160,13 +160,13 @@ for (int j = 0; j &lt; C; j++)        // column-major
 for (int j = 0; j &lt; C; j++)        // column-major
     for (int i = 0; i &lt; R; i++)
         visit(a[i][j]);</code></pre>
-<pre data-lang="python"><code>for i in range(R):          # row-major
-    for j in range(C):
-        visit(a[i][j])
+<pre data-lang="js"><code>for (let i = 0; i &lt; R; i++)        // row-major
+    for (let j = 0; j &lt; C; j++)
+        visit(a[i][j]);
 
-for j in range(C):          # column-major
-    for i in range(R):
-        visit(a[i][j])</code></pre>
+for (let j = 0; j &lt; C; j++)        // column-major
+    for (let i = 0; i &lt; R; i++)
+        visit(a[i][j]);</code></pre>
           </div>
         </article>
 
@@ -185,10 +185,11 @@ for (int i = 0; i &lt; n; i++) {
     primary   += a[i][i];
     secondary += a[i][n - 1 - i];
 }</code></pre>
-<pre data-lang="python"><code># square n x n
-for i in range(n):
-    primary   += a[i][i]
-    secondary += a[i][n - 1 - i]</code></pre>
+<pre data-lang="js"><code>// square n x n
+for (let i = 0; i &lt; n; i++) {
+    primary   += a[i][i];
+    secondary += a[i][n - 1 - i];
+}</code></pre>
           </div>
         </article>
 
@@ -226,18 +227,21 @@ while (top &lt;= bottom &amp;&amp; left &lt;= right) {
         left++;
     }
 }</code></pre>
-<pre data-lang="python"><code>top, bottom, left, right = 0, R - 1, 0, C - 1
-while top &lt;= bottom and left &lt;= right:
-    for j in range(left, right + 1): out.append(a[top][j])
-    top += 1
-    for i in range(top, bottom + 1): out.append(a[i][right])
-    right -= 1
-    if top &lt;= bottom:
-        for j in range(right, left - 1, -1): out.append(a[bottom][j])
-        bottom -= 1
-    if left &lt;= right:
-        for i in range(bottom, top - 1, -1): out.append(a[i][left])
-        left += 1</code></pre>
+<pre data-lang="js"><code>let top = 0, bottom = R - 1, left = 0, right = C - 1;
+while (top &lt;= bottom &amp;&amp; left &lt;= right) {
+    for (let j = left; j &lt;= right; j++) out.push(a[top][j]);
+    top++;
+    for (let i = top; i &lt;= bottom; i++) out.push(a[i][right]);
+    right--;
+    if (top &lt;= bottom) {
+        for (let j = right; j &gt;= left; j--) out.push(a[bottom][j]);
+        bottom--;
+    }
+    if (left &lt;= right) {
+        for (let i = bottom; i &gt;= top; i--) out.push(a[i][left]);
+        left++;
+    }
+}</code></pre>
           </div>
         </article>
 
@@ -258,11 +262,12 @@ for (int[] d : dirs) {
     if (nr &lt; 0 || nr &gt;= R || nc &lt; 0 || nc &gt;= C) continue;
     // use grid[nr][nc]
 }</code></pre>
-<pre data-lang="python"><code>DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-for dr, dc in DIRS:
-    nr, nc = r + dr, c + dc
-    if 0 &lt;= nr &lt; R and 0 &lt;= nc &lt; C:
-        ...  # use grid[nr][nc]</code></pre>
+<pre data-lang="js"><code>const DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+for (const [dr, dc] of DIRS) {
+    const nr = r + dr, nc = c + dc;
+    if (nr &lt; 0 || nr &gt;= R || nc &lt; 0 || nc &gt;= C) continue;
+    // use grid[nr][nc]
+}</code></pre>
           </div>
         </article>
 
@@ -285,14 +290,13 @@ for (int[] row : a)
     for (int l = 0, r = n - 1; l &lt; r; l++, r--) {
         int t = row[l]; row[l] = row[r]; row[r] = t;
     }</code></pre>
-<pre data-lang="python"><code># in-place transpose of n x n: only touch the upper triangle
-for i in range(n):
-    for j in range(i + 1, n):
-        a[i][j], a[j][i] = a[j][i], a[i][j]
-for row in a:
-    row.reverse()
+<pre data-lang="js"><code>// in-place transpose of n x n: only touch the upper triangle
+for (let i = 0; i &lt; n; i++)
+    for (let j = i + 1; j &lt; n; j++)
+        [a[i][j], a[j][i]] = [a[j][i], a[i][j]];
+for (const row of a) row.reverse();
 
-# one-liner (new matrix): list(zip(*a[::-1]))</code></pre>
+// one-liner (new matrix): a[0].map((_, j) =&gt; a.map(row =&gt; row[j]).reverse())</code></pre>
           </div>
         </article>
 
@@ -375,8 +379,8 @@ for row in a:
           <p>Each cell is a node, neighbours are edges. Islands, flood fill, shortest path → DFS / BFS. Mark visited to avoid loops.</p></div>
         <div class="tip card"><div class="tip-ico">⚡</div><h3>Prefix sums for ranges</h3>
           <p>Any “sum of a sub-rectangle” query repeated many times → 2D prefix sum. Pad with an extra zero row and column.</p></div>
-        <div class="tip card"><div class="tip-ico">🐍</div><h3>Python pitfall</h3>
-          <p><code>[[0]*C]*R</code> copies the <em>same</em> row R times. Always use <code>[[0]*C for _ in range(R)]</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">⚠️</div><h3>JavaScript pitfall</h3>
+          <p><code>new Array(R).fill(new Array(C).fill(0))</code> puts the <em>same</em> row in every slot. Use <code>Array.from({ length: R }, () =&gt; new Array(C).fill(0))</code>.</p></div>
       </div>
 
       <div class="grid-2 mt">

@@ -1,5 +1,5 @@
 // Question bank for the "Important questions" section.
-// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,python}
+// Each entry: id, title, difficulty, tags, desc, example, hint, approach, complexity, link, code{cpp,java,js}
 window.QUESTIONS = [
   {
     id: "transpose",
@@ -29,10 +29,15 @@ window.QUESTIONS = [
             res[j][i] = a[i][j];
     return res;
 }`,
-      python: `def transpose(a):
-    R, C = len(a), len(a[0])
-    return [[a[i][j] for i in range(R)] for j in range(C)]
-    # or simply: [list(row) for row in zip(*a)]`
+      js: `function transpose(a) {
+    const R = a.length, C = a[0].length;
+    const res = Array.from({ length: C }, () => new Array(R));
+    for (let i = 0; i < R; i++)
+        for (let j = 0; j < C; j++)
+            res[j][i] = a[i][j];
+    return res;
+    // or: a[0].map((_, j) => a.map(row => row[j]))
+}`
     }
   },
   {
@@ -61,12 +66,14 @@ window.QUESTIONS = [
     if (n % 2 == 1) sum -= a[n / 2][n / 2];
     return sum;
 }`,
-      python: `def diagonal_sum(a):
-    n = len(a)
-    s = sum(a[i][i] + a[i][n - 1 - i] for i in range(n))
-    if n % 2 == 1:
-        s -= a[n // 2][n // 2]
-    return s`
+      js: `function diagonalSum(a) {
+    const n = a.length;
+    let sum = 0;
+    for (let i = 0; i < n; i++)
+        sum += a[i][i] + a[i][n - 1 - i];
+    if (n % 2 === 1) sum -= a[(n - 1) / 2][(n - 1) / 2];
+    return sum;
+}`
     }
   },
   {
@@ -99,14 +106,15 @@ window.QUESTIONS = [
                 res[i][j] += (long) A[i][k] * B[k][j];
     return res;
 }`,
-      python: `def multiply(A, B):
-    R, K, C = len(A), len(B), len(B[0])
-    res = [[0] * C for _ in range(R)]
-    for i in range(R):
-        for k in range(K):
-            for j in range(C):
-                res[i][j] += A[i][k] * B[k][j]
-    return res`
+      js: `function multiply(A, B) {
+    const R = A.length, K = B.length, C = B[0].length;
+    const res = Array.from({ length: R }, () => new Array(C).fill(0));
+    for (let i = 0; i < R; i++)
+        for (let k = 0; k < K; k++)
+            for (let j = 0; j < C; j++)
+                res[i][j] += A[i][k] * B[k][j];
+    return res;
+}`
     }
   },
   {
@@ -137,14 +145,14 @@ window.QUESTIONS = [
         res[k / c][k % c] = a[k / n][k % n];
     return res;
 }`,
-      python: `def matrix_reshape(a, r, c):
-    m, n = len(a), len(a[0])
-    if m * n != r * c:
-        return a
-    res = [[0] * c for _ in range(r)]
-    for k in range(m * n):
-        res[k // c][k % c] = a[k // n][k % n]
-    return res`
+      js: `function matrixReshape(a, r, c) {
+    const m = a.length, n = a[0].length;
+    if (m * n !== r * c) return a;
+    const res = Array.from({ length: r }, () => new Array(c));
+    for (let k = 0; k < m * n; k++)
+        res[Math.floor(k / c)][k % c] = a[Math.floor(k / n)][k % n];
+    return res;
+}`
     }
   },
   {
@@ -171,10 +179,12 @@ window.QUESTIONS = [
             if (a[i][j] != a[i - 1][j - 1]) return false;
     return true;
 }`,
-      python: `def is_toeplitz(a):
-    return all(a[i][j] == a[i - 1][j - 1]
-               for i in range(1, len(a))
-               for j in range(1, len(a[0])))`
+      js: `function isToeplitzMatrix(a) {
+    for (let i = 1; i < a.length; i++)
+        for (let j = 1; j < a[0].length; j++)
+            if (a[i][j] !== a[i - 1][j - 1]) return false;
+    return true;
+}`
     }
   },
   {
@@ -209,16 +219,17 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
     dfs(g, r + 1, c, old, color); dfs(g, r - 1, c, old, color);
     dfs(g, r, c + 1, old, color); dfs(g, r, c - 1, old, color);
 }`,
-      python: `def flood_fill(g, sr, sc, color):
-    R, C, old = len(g), len(g[0]), g[sr][sc]
-    if old == color:
-        return g
-    def dfs(r, c):
-        if 0 <= r < R and 0 <= c < C and g[r][c] == old:
-            g[r][c] = color
-            dfs(r + 1, c); dfs(r - 1, c); dfs(r, c + 1); dfs(r, c - 1)
-    dfs(sr, sc)
-    return g`
+      js: `function floodFill(g, sr, sc, color) {
+    const R = g.length, C = g[0].length, old = g[sr][sc];
+    if (old === color) return g;
+    const dfs = (r, c) => {
+        if (r < 0 || r >= R || c < 0 || c >= C || g[r][c] !== old) return;
+        g[r][c] = color;
+        dfs(r + 1, c); dfs(r - 1, c); dfs(r, c + 1); dfs(r, c - 1);
+    };
+    dfs(sr, sc);
+    return g;
+}`
     }
   },
   {
@@ -251,13 +262,13 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
             int t = row[l]; row[l] = row[r]; row[r] = t;
         }
 }`,
-      python: `def rotate(a):
-    n = len(a)
-    for i in range(n):
-        for j in range(i + 1, n):
-            a[i][j], a[j][i] = a[j][i], a[i][j]
-    for row in a:
-        row.reverse()`
+      js: `function rotate(a) {
+    const n = a.length;
+    for (let i = 0; i < n; i++)
+        for (let j = i + 1; j < n; j++)
+            [a[i][j], a[j][i]] = [a[j][i], a[i][j]];
+    for (const row of a) row.reverse();
+}`
     }
   },
   {
@@ -310,21 +321,25 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
     }
     return out;
 }`,
-      python: `def spiral_order(a):
-    out = []
-    top, bottom, left, right = 0, len(a) - 1, 0, len(a[0]) - 1
-    while top <= bottom and left <= right:
-        for j in range(left, right + 1): out.append(a[top][j])
-        top += 1
-        for i in range(top, bottom + 1): out.append(a[i][right])
-        right -= 1
-        if top <= bottom:
-            for j in range(right, left - 1, -1): out.append(a[bottom][j])
-            bottom -= 1
-        if left <= right:
-            for i in range(bottom, top - 1, -1): out.append(a[i][left])
-            left += 1
-    return out`
+      js: `function spiralOrder(a) {
+    const out = [];
+    let top = 0, bottom = a.length - 1, left = 0, right = a[0].length - 1;
+    while (top <= bottom && left <= right) {
+        for (let j = left; j <= right; j++) out.push(a[top][j]);
+        top++;
+        for (let i = top; i <= bottom; i++) out.push(a[i][right]);
+        right--;
+        if (top <= bottom) {
+            for (let j = right; j >= left; j--) out.push(a[bottom][j]);
+            bottom--;
+        }
+        if (left <= right) {
+            for (let i = bottom; i >= top; i--) out.push(a[i][left]);
+            left++;
+        }
+    }
+    return out;
+}`
     }
   },
   {
@@ -367,21 +382,20 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
         if (col0) a[i][0] = 0;
     }
 }`,
-      python: `def set_zeroes(a):
-    R, C = len(a), len(a[0])
-    col0 = False
-    for i in range(R):
-        if a[i][0] == 0:
-            col0 = True
-        for j in range(1, C):
-            if a[i][j] == 0:
-                a[i][0] = a[0][j] = 0
-    for i in range(R - 1, -1, -1):
-        for j in range(C - 1, 0, -1):
-            if a[i][0] == 0 or a[0][j] == 0:
-                a[i][j] = 0
-        if col0:
-            a[i][0] = 0`
+      js: `function setZeroes(a) {
+    const R = a.length, C = a[0].length;
+    let col0 = false;
+    for (let i = 0; i < R; i++) {
+        if (a[i][0] === 0) col0 = true;
+        for (let j = 1; j < C; j++)
+            if (a[i][j] === 0) a[i][0] = a[0][j] = 0;
+    }
+    for (let i = R - 1; i >= 0; i--) {
+        for (let j = C - 1; j >= 1; j--)
+            if (a[i][0] === 0 || a[0][j] === 0) a[i][j] = 0;
+        if (col0) a[i][0] = 0;
+    }
+}`
     }
   },
   {
@@ -418,19 +432,17 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
     }
     return false;
 }`,
-      python: `def search_matrix(a, target):
-    R, C = len(a), len(a[0])
-    lo, hi = 0, R * C - 1
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        v = a[mid // C][mid % C]
-        if v == target:
-            return True
-        if v < target:
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return False`
+      js: `function searchMatrix(a, target) {
+    const R = a.length, C = a[0].length;
+    let lo = 0, hi = R * C - 1;
+    while (lo <= hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        const v = a[Math.floor(mid / C)][mid % C];
+        if (v === target) return true;
+        if (v < target) lo = mid + 1; else hi = mid - 1;
+    }
+    return false;
+}`
     }
   },
   {
@@ -461,16 +473,14 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
     }
     return false;
 }`,
-      python: `def search_matrix(a, target):
-    r, c = 0, len(a[0]) - 1
-    while r < len(a) and c >= 0:
-        if a[r][c] == target:
-            return True
-        if a[r][c] > target:
-            c -= 1
-        else:
-            r += 1
-    return False`
+      js: `function searchMatrix(a, target) {
+    let r = 0, c = a[0].length - 1;
+    while (r < a.length && c >= 0) {
+        if (a[r][c] === target) return true;
+        if (a[r][c] > target) c--; else r++;
+    }
+    return false;
+}`
     }
   },
   {
@@ -509,13 +519,17 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
     }
     return out;
 }`,
-      python: `def find_diagonal_order(a):
-    R, C = len(a), len(a[0])
-    out = []
-    for d in range(R + C - 1):
-        diag = [a[i][d - i] for i in range(max(0, d - C + 1), min(d, R - 1) + 1)]
-        out.extend(reversed(diag) if d % 2 == 0 else diag)
-    return out`
+      js: `function findDiagonalOrder(a) {
+    const R = a.length, C = a[0].length, out = [];
+    for (let d = 0; d <= R + C - 2; d++) {
+        const lo = Math.max(0, d - C + 1), hi = Math.min(d, R - 1);
+        if (d % 2 === 0)
+            for (let i = hi; i >= lo; i--) out.push(a[i][d - i]);
+        else
+            for (let i = lo; i <= hi; i++) out.push(a[i][d - i]);
+    }
+    return out;
+}`
     }
   },
   {
@@ -560,19 +574,22 @@ private void dfs(int[][] g, int r, int c, int old, int color) {
         }
     for (int[] row : b) for (int j = 0; j < C; j++) row[j] >>= 1;
 }`,
-      python: `def game_of_life(b):
-    R, C = len(b), len(b[0])
-    for i in range(R):
-        for j in range(C):
-            live = sum(b[r][c] & 1
-                       for r in range(max(0, i - 1), min(R, i + 2))
-                       for c in range(max(0, j - 1), min(C, j + 2))
-                       if (r, c) != (i, j))
-            if live == 3 or (live == 2 and b[i][j] & 1):
-                b[i][j] |= 2
-    for i in range(R):
-        for j in range(C):
-            b[i][j] >>= 1`
+      js: `function gameOfLife(b) {
+    const R = b.length, C = b[0].length;
+    for (let i = 0; i < R; i++)
+        for (let j = 0; j < C; j++) {
+            let live = 0;
+            for (let di = -1; di <= 1; di++)
+                for (let dj = -1; dj <= 1; dj++) {
+                    if (di === 0 && dj === 0) continue;
+                    const r = i + di, c = j + dj;
+                    if (r >= 0 && r < R && c >= 0 && c < C) live += b[r][c] & 1;
+                }
+            if (live === 3 || (live === 2 && (b[i][j] & 1))) b[i][j] |= 2;
+        }
+    for (const row of b)
+        for (let j = 0; j < C; j++) row[j] >>= 1;
+}`
     }
   },
   {
@@ -611,23 +628,27 @@ private void sink(char[][] g, int r, int c) {
     g[r][c] = '0';
     sink(g, r + 1, c); sink(g, r - 1, c); sink(g, r, c + 1); sink(g, r, c - 1);
 }`,
-      python: `from collections import deque
-
-def num_islands(g):
-    R, C, count = len(g), len(g[0]), 0
-    for i in range(R):
-        for j in range(C):
-            if g[i][j] == "1":
-                count += 1
-                g[i][j] = "0"
-                q = deque([(i, j)])
-                while q:            # BFS avoids recursion limits
-                    r, c = q.popleft()
-                    for nr, nc in ((r+1, c), (r-1, c), (r, c+1), (r, c-1)):
-                        if 0 <= nr < R and 0 <= nc < C and g[nr][nc] == "1":
-                            g[nr][nc] = "0"
-                            q.append((nr, nc))
-    return count`
+      js: `function numIslands(g) {
+    const R = g.length, C = g[0].length;
+    let count = 0;
+    for (let i = 0; i < R; i++)
+        for (let j = 0; j < C; j++) {
+            if (g[i][j] !== "1") continue;
+            count++;
+            g[i][j] = "0";
+            const stack = [[i, j]];            // iterative DFS: no call-stack limits
+            while (stack.length) {
+                const [r, c] = stack.pop();
+                for (const [nr, nc] of [[r + 1, c], [r - 1, c], [r, c + 1], [r, c - 1]]) {
+                    if (nr >= 0 && nr < R && nc >= 0 && nc < C && g[nr][nc] === "1") {
+                        g[nr][nc] = "0";
+                        stack.push([nr, nc]);
+                    }
+                }
+            }
+        }
+    return count;
+}`
     }
   },
   {
@@ -669,17 +690,20 @@ public:
         return P[r2 + 1][c2 + 1] - P[r1][c2 + 1] - P[r2 + 1][c1] + P[r1][c1];
     }
 }`,
-      python: `class NumMatrix:
-    def __init__(self, a):
-        R, C = len(a), len(a[0])
-        self.P = P = [[0] * (C + 1) for _ in range(R + 1)]
-        for i in range(R):
-            for j in range(C):
-                P[i + 1][j + 1] = a[i][j] + P[i][j + 1] + P[i + 1][j] - P[i][j]
-
-    def sum_region(self, r1, c1, r2, c2):
-        P = self.P
-        return P[r2 + 1][c2 + 1] - P[r1][c2 + 1] - P[r2 + 1][c1] + P[r1][c1]`
+      js: `class NumMatrix {
+    constructor(a) {
+        const R = a.length, C = a[0].length;
+        this.P = Array.from({ length: R + 1 }, () => new Array(C + 1).fill(0));
+        const P = this.P;
+        for (let i = 0; i < R; i++)
+            for (let j = 0; j < C; j++)
+                P[i + 1][j + 1] = a[i][j] + P[i][j + 1] + P[i + 1][j] - P[i][j];
+    }
+    sumRegion(r1, c1, r2, c2) {
+        const P = this.P;
+        return P[r2 + 1][c2 + 1] - P[r1][c2 + 1] - P[r2 + 1][c1] + P[r1][c1];
+    }
+}`
     }
   },
   {
@@ -716,18 +740,20 @@ public:
         }
     return true;
 }`,
-      python: `def is_valid_sudoku(b):
-    seen = set()
-    for i in range(9):
-        for j in range(9):
-            v = b[i][j]
-            if v == ".":
-                continue
-            keys = {("r", i, v), ("c", j, v), ("b", i // 3, j // 3, v)}
-            if keys & seen:
-                return False
-            seen |= keys
-    return True`
+      js: `function isValidSudoku(b) {
+    const rows = Array.from({ length: 9 }, () => new Set());
+    const cols = Array.from({ length: 9 }, () => new Set());
+    const boxes = Array.from({ length: 9 }, () => new Set());
+    for (let i = 0; i < 9; i++)
+        for (let j = 0; j < 9; j++) {
+            const v = b[i][j];
+            if (v === ".") continue;
+            const k = Math.floor(i / 3) * 3 + Math.floor(j / 3);
+            if (rows[i].has(v) || cols[j].has(v) || boxes[k].has(v)) return false;
+            rows[i].add(v); cols[j].add(v); boxes[k].add(v);
+        }
+    return true;
+}`
     }
   },
   {
@@ -766,23 +792,20 @@ public:
     }
     return lo;
 }`,
-      python: `def kth_smallest(a, k):
-    n = len(a)
-    lo, hi = a[0][0], a[-1][-1]
-    while lo < hi:
-        mid = (lo + hi) // 2
-        cnt, i, j = 0, n - 1, 0
-        while i >= 0 and j < n:          # staircase count of values <= mid
-            if a[i][j] <= mid:
-                cnt += i + 1
-                j += 1
-            else:
-                i -= 1
-        if cnt < k:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo`
+      js: `function kthSmallest(a, k) {
+    const n = a.length;
+    let lo = a[0][0], hi = a[n - 1][n - 1];
+    while (lo < hi) {
+        const mid = Math.floor((lo + hi) / 2);
+        let cnt = 0;
+        for (let i = n - 1, j = 0; i >= 0 && j < n; ) {   // staircase count of values <= mid
+            if (a[i][j] <= mid) { cnt += i + 1; j++; }
+            else i--;
+        }
+        if (cnt < k) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+}`
     }
   },
   {
@@ -819,15 +842,18 @@ public:
             }
     return best * best;
 }`,
-      python: `def maximal_square(a):
-    R, C, best = len(a), len(a[0]), 0
-    dp = [[0] * (C + 1) for _ in range(R + 1)]
-    for i in range(1, R + 1):
-        for j in range(1, C + 1):
-            if a[i - 1][j - 1] == "1":
-                dp[i][j] = 1 + min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
-                best = max(best, dp[i][j])
-    return best * best`
+      js: `function maximalSquare(a) {
+    const R = a.length, C = a[0].length;
+    const dp = Array.from({ length: R + 1 }, () => new Array(C + 1).fill(0));
+    let best = 0;
+    for (let i = 1; i <= R; i++)
+        for (let j = 1; j <= C; j++)
+            if (a[i - 1][j - 1] === "1") {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+                best = Math.max(best, dp[i][j]);
+            }
+    return best * best;
+}`
     }
   },
   {
@@ -887,20 +913,24 @@ private int largestInHistogram(int[] h) {
     }
     return best;
 }`,
-      python: `def maximal_rectangle(a):
-    C, best = len(a[0]), 0
-    h = [0] * C
-    for row in a:
-        for j in range(C):
-            h[j] = h[j] + 1 if row[j] == "1" else 0
-        stack = []
-        for i, cur in enumerate(h + [0]):
-            while stack and h[stack[-1]] >= cur:
-                height = h[stack.pop()]
-                width = i if not stack else i - stack[-1] - 1
-                best = max(best, height * width)
-            stack.append(i)
-    return best`
+      js: `function maximalRectangle(a) {
+    const C = a[0].length, h = new Array(C).fill(0);
+    let best = 0;
+    for (const row of a) {
+        for (let j = 0; j < C; j++) h[j] = row[j] === "1" ? h[j] + 1 : 0;
+        const stack = [];
+        for (let i = 0; i <= C; i++) {
+            const cur = i === C ? 0 : h[i];
+            while (stack.length && h[stack[stack.length - 1]] >= cur) {
+                const height = h[stack.pop()];
+                const width = stack.length ? i - stack[stack.length - 1] - 1 : i;
+                best = Math.max(best, height * width);
+            }
+            stack.push(i);
+        }
+    }
+    return best;
+}`
     }
   },
   {
@@ -956,27 +986,32 @@ private int dfs(int[][] a, int r, int c) {
     }
     return memo[r][c] = best;
 }`,
-      python: `from functools import lru_cache
-
-def longest_increasing_path(a):
-    R, C = len(a), len(a[0])
-
-    @lru_cache(maxsize=None)
-    def dfs(r, c):
-        best = 1
-        for nr, nc in ((r+1, c), (r-1, c), (r, c+1), (r, c-1)):
-            if 0 <= nr < R and 0 <= nc < C and a[nr][nc] > a[r][c]:
-                best = max(best, 1 + dfs(nr, nc))
-        return best
-
-    return max(dfs(i, j) for i in range(R) for j in range(C))`
+      js: `function longestIncreasingPath(a) {
+    const R = a.length, C = a[0].length;
+    const memo = Array.from({ length: R }, () => new Array(C).fill(0));
+    const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    const dfs = (r, c) => {
+        if (memo[r][c]) return memo[r][c];
+        let best = 1;
+        for (const [dr, dc] of dirs) {
+            const nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < R && nc >= 0 && nc < C && a[nr][nc] > a[r][c])
+                best = Math.max(best, 1 + dfs(nr, nc));
+        }
+        return (memo[r][c] = best);
+    };
+    let ans = 0;
+    for (let i = 0; i < R; i++)
+        for (let j = 0; j < C; j++) ans = Math.max(ans, dfs(i, j));
+    return ans;
+}`
     }
   }
 ];
 
 window.QUIZ = [
   {
-    q: "For int a[5][8], what does a.length (Java) / len(a) (Python) return?",
+    q: "For int a[5][8], what does a.length (Java / JavaScript) return?",
     opts: ["8", "5", "40", "13"],
     a: 1,
     exp: "The outer array holds the rows, so its length is the number of rows: 5. Columns are a[0].length = 8."
@@ -1000,10 +1035,10 @@ window.QUIZ = [
     exp: "Transpose turns rows into columns; reversing each row then fixes the direction, giving a clockwise rotation."
   },
   {
-    q: "What is wrong with grid = [[0] * 3] * 3 in Python?",
-    opts: ["It creates a 1D list", "Nothing", "All three rows are the same list object", "It raises a TypeError"],
+    q: "What is wrong with new Array(3).fill(new Array(3).fill(0)) in JavaScript?",
+    opts: ["It creates a 1D array", "Nothing", "All three rows are the same array object", "It throws a TypeError"],
     a: 2,
-    exp: "The outer * copies the reference, so changing grid[0][0] changes column 0 of every row. Use a comprehension."
+    exp: "fill() puts the same reference in every slot, so changing grid[0][0] changes column 0 of every row. Use Array.from({ length: 3 }, () => new Array(3).fill(0))."
   },
   {
     q: "Rows and columns are each sorted. Fastest simple way to search for a value?",

@@ -16,7 +16,7 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
   argument, stays ahead), six common patterns, visualizers comparing interval-scheduling rules and
   greedy vs optimal coin change, tips & tricks, 20 important questions and a quiz.
 
-Every question has a hint, the approach, complexity, and solutions in C++ / Java / Python;
+Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.
 
 Open the HTML files in any browser — no build step needed. To host them, enable GitHub Pages
