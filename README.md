@@ -1,12 +1,17 @@
 # learning-code
 
-Learning resources for data structures & algorithms.
+Interactive learning guides for data structures & algorithms. Start at [`index.html`](index.html).
 
 ## Topics
 
 - [2D Arrays & Matrices](2d-arrays/index.html) — concepts, memory layout, traversal patterns,
-  an interactive traversal visualizer, tips & tricks, 20 important questions (hints + solutions in
-  C++ / Java / Python, with progress tracking) and a quick quiz.
+  an interactive traversal visualizer, tips & tricks, 20 important questions and a quiz.
+- [Binary Search](binary-search/index.html) — the monotonic-condition mental model, templates
+  (exact match, lower/upper bound, first/last true), library helpers, a step-by-step visualizer,
+  binary search on the answer, tips & tricks, 20 important questions and a quiz.
 
-Open `2d-arrays/index.html` in any browser — no build step needed. To host it, enable GitHub Pages
-for this repository and visit `/2d-arrays/`.
+Every question has a hint, the approach, complexity, and solutions in C++ / Java / Python;
+solved questions are tracked in your browser.
+
+Open the HTML files in any browser — no build step needed. To host them, enable GitHub Pages
+for this repository.

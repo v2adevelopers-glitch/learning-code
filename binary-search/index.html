@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Binary Search Guide</title>
+  <meta name="description" content="Learn binary search properly: invariants, templates, lower/upper bound, binary search on the answer, an interactive step-by-step visualizer, tips and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Binary&nbsp;Search&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#templates">Templates</a>
+        <a href="#visualizer">Visualizer</a>
+        <a href="#answer">On the answer</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="python">Python</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Algorithms · Topic Guide</p>
+        <h1>Binary Search</h1>
+        <p class="lead">Halve the search space every step and a million items take only 20 comparisons.
+          The idea is simple, but off-by-one errors make it notoriously easy to get wrong. This page gives you
+          <em>one</em> way of thinking — a monotonic yes/no condition plus a loop invariant — that works for every variant.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-bs" aria-hidden="true">
+        <div class="hero-bs-row" id="heroBs"></div>
+        <p class="hero-bs-cap" id="heroBsCap">searching for 37…</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>What is binary search?</h3>
+          <p>Binary search finds a target in a <strong>sorted</strong> range by looking at the middle element and
+            throwing away the half that can’t contain the answer.</p>
+          <ul class="checks">
+            <li>Look at <code>mid</code>. Too small? The answer is to the right. Too big? To the left.</li>
+            <li>Each step halves the range → <strong>O(log n)</strong> time, <strong>O(1)</strong> space.</li>
+            <li>Linear search on 1,000,000 items: up to 1,000,000 checks. Binary search: at most 20.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>How many steps?</h3>
+          <table class="steps-table">
+            <thead><tr><th>n (items)</th><th>max comparisons ≈ ⌈log₂(n+1)⌉</th></tr></thead>
+            <tbody>
+              <tr><td>10</td><td>4</td></tr>
+              <tr><td>1,000</td><td>10</td></tr>
+              <tr><td>1,000,000</td><td>20</td></tr>
+              <tr><td>1,000,000,000</td><td>30</td></tr>
+              <tr><td>2<sup>63</sup> (all of <code>long</code>)</td><td>63</td></tr>
+            </tbody>
+          </table>
+          <p class="muted small">Doubling the input adds just <em>one</em> step.</p>
+        </div>
+      </div>
+
+      <h3 class="sub">The real requirement: a monotonic condition</h3>
+      <div class="grid-2">
+        <div class="card">
+          <p>“Sorted array” is just the most common case. Binary search works whenever you can ask a
+            <strong>yes/no question</strong> whose answers look like this across the range:</p>
+          <div class="mono-strip" id="monoStrip"></div>
+          <p>All <strong>no</strong>s, then all <strong>yes</strong>es. Binary search finds the
+            <strong>boundary</strong> — the first <em>yes</em>. Every variant (lower bound, first bad version, minimum speed,
+            square root…) is “find the first yes” for a different question.</p>
+        </div>
+        <div class="card">
+          <h3>Examples of the yes/no question</h3>
+          <ul class="checks">
+            <li>Sorted array, target t: <code>a[i] &gt;= t</code>?</li>
+            <li>First bad version: <code>isBad(v)</code>?</li>
+            <li>Integer square root of x: <code>m * m &gt; x</code>?</li>
+            <li>Koko’s bananas: can she finish at speed <code>k</code>?</li>
+            <li>Rotated array: <code>a[i] &lt;= a[last]</code>? (finds the minimum)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Computing mid safely:</strong> <code>(lo + hi) / 2</code> can overflow when <code>lo + hi</code> exceeds
+        the int range (a real bug that sat in Java’s standard library for years). Use <code>lo + (hi - lo) / 2</code>.
+        Python integers don’t overflow, so <code>(lo + hi) // 2</code> is fine there.
+      </div>
+    </section>
+
+    <!-- TEMPLATES -->
+    <section id="templates" class="section">
+      <h2><span class="num">02</span> Templates you should know by heart</h2>
+      <p class="lead small-lead">Learn these three. Write each one with its <strong>invariant</strong> in a comment
+        until you no longer need to.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>1 · Exact match (<code>lo &lt;= hi</code>)</h3>
+          <p>Search space is the closed range <code>[lo, hi]</code>. Stop as soon as you find it; return −1 if the range becomes empty.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int binarySearch(vector&lt;int&gt;&amp; a, int target) {
+    int lo = 0, hi = a.size() - 1;      // search [lo, hi]
+    while (lo &lt;= hi) {                  // range not empty
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] == target) return mid;
+        if (a[mid] &lt; target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}</code></pre>
+<pre data-lang="java"><code>int binarySearch(int[] a, int target) {
+    int lo = 0, hi = a.length - 1;      // search [lo, hi]
+    while (lo &lt;= hi) {                  // range not empty
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] == target) return mid;
+        if (a[mid] &lt; target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}</code></pre>
+<pre data-lang="python"><code>def binary_search(a, target):
+    lo, hi = 0, len(a) - 1              # search [lo, hi]
+    while lo &lt;= hi:                     # range not empty
+        mid = (lo + hi) // 2
+        if a[mid] == target:
+            return mid
+        if a[mid] &lt; target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>2 · Lower bound — first index with <code>a[i] &gt;= t</code></h3>
+          <p>Half-open range <code>[lo, hi)</code> with <code>hi = n</code>. The answer may be <code>n</code> (“not found / insert at end”).
+            Loop ends when <code>lo == hi</code>, which <em>is</em> the answer.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int lowerBound(vector&lt;int&gt;&amp; a, int t) {
+    int lo = 0, hi = a.size();          // answer in [lo, hi]
+    while (lo &lt; hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] &gt;= t) hi = mid;      // mid could be the answer
+        else lo = mid + 1;              // mid is definitely not
+    }
+    return lo;                          // == hi
+}</code></pre>
+<pre data-lang="java"><code>int lowerBound(int[] a, int t) {
+    int lo = 0, hi = a.length;          // answer in [lo, hi]
+    while (lo &lt; hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (a[mid] &gt;= t) hi = mid;      // mid could be the answer
+        else lo = mid + 1;              // mid is definitely not
+    }
+    return lo;                          // == hi
+}</code></pre>
+<pre data-lang="python"><code>def lower_bound(a, t):
+    lo, hi = 0, len(a)                  # answer in [lo, hi]
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if a[mid] &gt;= t:
+            hi = mid                    # mid could be the answer
+        else:
+            lo = mid + 1                # mid is definitely not
+    return lo                           # == hi</code></pre>
+          </div>
+          <p class="muted small"><strong>Upper bound</strong> (first <code>a[i] &gt; t</code>) is the same with <code>&gt;</code>.
+            Count of <code>t</code> = <code>upper − lower</code>. Last index of <code>t</code> = <code>upper − 1</code>.</p>
+        </article>
+
+        <article class="card pattern">
+          <h3>3 · Generic “first true” on a predicate</h3>
+          <p>The master template. Plug in any monotonic <code>ok(x)</code> (false…false, true…true) over integers
+            <code>[lo, hi]</code>. Make sure <code>hi</code> is a value where <code>ok</code> is surely true.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// smallest x in [lo, hi] with ok(x) == true
+long long firstTrue(long long lo, long long hi, function&lt;bool(long long)&gt; ok) {
+    while (lo &lt; hi) {
+        long long mid = lo + (hi - lo) / 2;
+        if (ok(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}</code></pre>
+<pre data-lang="java"><code>// smallest x in [lo, hi] with ok(x) == true
+long firstTrue(long lo, long hi, LongPredicate ok) {
+    while (lo &lt; hi) {
+        long mid = lo + (hi - lo) / 2;
+        if (ok.test(mid)) hi = mid;
+        else lo = mid + 1;
+    }
+    return lo;
+}</code></pre>
+<pre data-lang="python"><code># smallest x in [lo, hi] with ok(x) == True
+def first_true(lo, hi, ok):
+    while lo &lt; hi:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid + 1
+    return lo</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>“Last true” without an infinite loop</h3>
+          <p>To find the <em>largest</em> x with <code>ok(x)</code> (true…true, false…false) you move <code>lo = mid</code>.
+            Then <code>mid</code> must round <strong>up</strong>, or <code>lo = 4, hi = 5</code> loops forever.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>while (lo &lt; hi) {
+    long long mid = lo + (hi - lo + 1) / 2;   // round UP
+    if (ok(mid)) lo = mid;
+    else hi = mid - 1;
+}
+return lo;</code></pre>
+<pre data-lang="java"><code>while (lo &lt; hi) {
+    long mid = lo + (hi - lo + 1) / 2;        // round UP
+    if (ok.test(mid)) lo = mid;
+    else hi = mid - 1;
+}
+return lo;</code></pre>
+<pre data-lang="python"><code>while lo &lt; hi:
+    mid = (lo + hi + 1) // 2                  # round UP
+    if ok(mid):
+        lo = mid
+    else:
+        hi = mid - 1
+return lo</code></pre>
+          </div>
+          <p class="muted small">Rule: if a branch does <code>lo = mid</code>, round mid up. If it does <code>hi = mid</code>, round down.</p>
+        </article>
+      </div>
+
+      <h3 class="sub">Built-in helpers</h3>
+      <div class="code" data-code>
+<pre data-lang="cpp"><code>#include &lt;algorithm&gt;
+auto it  = lower_bound(a.begin(), a.end(), t);   // first &gt;= t
+auto it2 = upper_bound(a.begin(), a.end(), t);   // first &gt; t
+bool has = binary_search(a.begin(), a.end(), t);
+int idx  = it - a.begin();
+int cnt  = it2 - it;                             // occurrences of t</code></pre>
+<pre data-lang="java"><code>import java.util.Arrays;
+int i = Arrays.binarySearch(a, t);
+// i &gt;= 0  → found at i (any occurrence if duplicates!)
+// i &lt; 0   → not found, insertion point = -(i + 1)
+// Collections.binarySearch(list, t) works the same for lists.
+// TreeSet / TreeMap: ceiling(t) = smallest &gt;= t, floor(t) = largest &lt;= t</code></pre>
+<pre data-lang="python"><code>from bisect import bisect_left, bisect_right, insort
+i = bisect_left(a, t)     # first index with a[i] &gt;= t  (lower bound)
+j = bisect_right(a, t)    # first index with a[j] &gt; t   (upper bound)
+count = j - i             # occurrences of t
+insort(a, t)              # insert keeping a sorted
+# Python 3.10+: bisect_left(a, t, key=func)</code></pre>
+      </div>
+    </section>
+
+    <!-- VISUALIZER -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">03</span> Interactive visualizer</h2>
+      <p class="lead small-lead">Step through the search and watch the range shrink. Grey cells have been ruled out.</p>
+
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Size <input type="number" id="bsSize" min="2" max="24" value="16"></label>
+          <label>Target <input type="number" id="bsTarget" value="42"></label>
+          <label>Mode
+            <select id="bsMode">
+              <option value="exact">Exact match (lo ≤ hi)</option>
+              <option value="lower">Lower bound (first ≥ t)</option>
+              <option value="upper">Upper bound (first &gt; t)</option>
+            </select>
+          </label>
+          <label class="check-label"><input type="checkbox" id="bsDups"> duplicates</label>
+        </div>
+        <div class="viz-buttons">
+          <button id="bsStep" class="active">Step ▶</button>
+          <button id="bsPlay">Play ⏵⏵</button>
+          <button id="bsReset" class="op">Reset</button>
+          <button id="bsShuffle" class="op">New array</button>
+        </div>
+        <div class="bs-array" id="bsArray"></div>
+        <div class="bs-status" id="bsStatus"></div>
+        <ol class="bs-log" id="bsLog"></ol>
+      </div>
+    </section>
+
+    <!-- ON THE ANSWER -->
+    <section id="answer" class="section">
+      <h2><span class="num">04</span> Binary search on the answer</h2>
+      <p class="lead small-lead">The most important idea for interviews. When a question asks for the
+        <strong>minimum</strong> X that works (or <strong>maximum</strong>), and checking “does X work?” is easy, binary search over X.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Recognise it</h3>
+          <ul class="checks">
+            <li>“Minimise the maximum …” / “maximise the minimum …”</li>
+            <li>“Smallest speed / capacity / days / size such that …”</li>
+            <li>If X works then X+1 also works (or the reverse) → monotonic.</li>
+            <li>Writing <code>feasible(X)</code> is an O(n) greedy pass.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Recipe</h3>
+          <ol class="plan">
+            <li>Define the answer range <code>[lo, hi]</code> — smallest and largest possible answers.</li>
+            <li>Write <code>feasible(x)</code> — usually a greedy simulation.</li>
+            <li>Check monotonicity in your head.</li>
+            <li>Run “first true” (min answer) or “last true” (max answer).</li>
+            <li>Total time: <code>O(n · log(range))</code>.</li>
+          </ol>
+        </div>
+      </div>
+
+      <h3 class="sub">Worked example — Koko eating bananas</h3>
+      <p>Piles <code>[3, 6, 7, 11]</code>, <code>h = 8</code> hours. Each hour Koko eats up to <code>k</code> bananas from one pile.
+        Find the minimum <code>k</code> to finish in time. Hours needed at speed k = Σ ⌈pile / k⌉.</p>
+      <div class="card">
+        <div class="koko" id="koko"></div>
+        <p class="muted small">Answers form false…false, true…true. Binary search finds the first true: <strong>k = 4</strong>.</p>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">05</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🎯</div><h3>Think “first true”</h3>
+          <p>Turn every problem into a monotonic yes/no question and find the boundary. One mental model instead of ten templates.</p></div>
+        <div class="tip card"><div class="tip-ico">📜</div><h3>Write the invariant</h3>
+          <p>e.g. “answer is always in <code>[lo, hi]</code>”. Each update must keep it true; then the return value is obvious.</p></div>
+        <div class="tip card"><div class="tip-ico">🔒</div><h3>Pick one range style</h3>
+          <p>Closed <code>[lo, hi]</code> pairs with <code>lo &lt;= hi</code> and <code>hi = mid − 1</code>. Half-open pairs with <code>lo &lt; hi</code> and <code>hi = mid</code>. Don’t mix.</p></div>
+        <div class="tip card"><div class="tip-ico">♾️</div><h3>Avoid infinite loops</h3>
+          <p>Every iteration must shrink the range. If you write <code>lo = mid</code>, round mid up: <code>lo + (hi − lo + 1) / 2</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">💥</div><h3>Overflow-safe mid</h3>
+          <p><code>lo + (hi − lo) / 2</code>. And use <code>long</code> when the answer range or <code>mid * mid</code> can exceed 2³¹.</p></div>
+        <div class="tip card"><div class="tip-ico">🧪</div><h3>Test tiny inputs</h3>
+          <p>Arrays of size 0, 1, 2; target smaller than all, larger than all, and duplicated. Most bugs show up with 2 elements.</p></div>
+        <div class="tip card"><div class="tip-ico">🔄</div><h3>Rotated arrays</h3>
+          <p>At least one half around <code>mid</code> is always sorted. Find which half, check if the target is inside it, discard the other.</p></div>
+        <div class="tip card"><div class="tip-ico">⛰️</div><h3>Compare with a neighbour</h3>
+          <p>No target? Compare <code>a[mid]</code> with <code>a[mid+1]</code> (peaks) or with <code>a[hi]</code> (rotation minimum).</p></div>
+        <div class="tip card"><div class="tip-ico">📐</div><h3>Answer space, not index space</h3>
+          <p>You can binary search over values: speeds, days, distances, √x. The array doesn’t even need to exist.</p></div>
+        <div class="tip card"><div class="tip-ico">🔢</div><h3>Real numbers</h3>
+          <p>For doubles, loop a fixed ~100 times (or until <code>hi − lo &lt; 1e-9</code>) instead of comparing for equality.</p></div>
+        <div class="tip card"><div class="tip-ico">📚</div><h3>Know your library</h3>
+          <p><code>lower_bound</code>, <code>bisect_left</code>, <code>TreeMap.ceilingKey</code> save time and bugs in contests.</p></div>
+        <div class="tip card"><div class="tip-ico">🗣️</div><h3>Trace out loud</h3>
+          <p>In interviews, dry-run 2–3 iterations on the example writing <code>lo / mid / hi</code>. It catches off-by-ones instantly.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Applying binary search to unsorted / non-monotonic data.</li>
+            <li><code>while (lo &lt; hi)</code> with <code>hi = mid − 1</code> → skips the answer.</li>
+            <li><code>lo = mid</code> with mid rounding down → infinite loop.</li>
+            <li><code>hi = n − 1</code> when the answer can be <code>n</code> (insert position).</li>
+            <li>Returning <code>mid</code> after the loop instead of <code>lo</code>.</li>
+            <li><code>mid * mid</code> overflowing int in square-root problems.</li>
+            <li>Wrong answer-space bounds (e.g. <code>lo = 0</code> when speed 0 divides by zero).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> classic search, search insert position — write both templates from memory.</li>
+            <li><strong>Day 2:</strong> first/last position, count occurrences, library functions.</li>
+            <li><strong>Day 3:</strong> sqrt(x), perfect square, first bad version (predicate thinking).</li>
+            <li><strong>Days 4–5:</strong> rotated arrays: search, minimum, with duplicates.</li>
+            <li><strong>Day 6:</strong> peak element, single element in sorted array (neighbour tricks).</li>
+            <li><strong>Days 7–8:</strong> on the answer: Koko, ship packages, bouquets, aggressive cows.</li>
+            <li><strong>Day 9:</strong> split array largest sum, 2D matrix search.</li>
+            <li><strong>Day 10:</strong> median of two sorted arrays; redo any you got wrong.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">06</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">07</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Find the monotonic condition, write the invariant, test with two elements.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

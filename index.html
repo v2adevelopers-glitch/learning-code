@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Code</title>
+  <meta name="description" content="Interactive guides to data structures and algorithms topics.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="2d-arrays/styles.css">
+  <style>
+    .topics { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 64px; }
+    .topic { text-decoration: none; color: var(--text); display: block; transition: transform .15s, border-color .15s; }
+    .topic:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .topic h2 { font-size: 1.3rem; margin: 6px 0; }
+    .topic p { color: var(--muted); font-size: .95rem; }
+    .topic .go { color: var(--accent); font-weight: 600; font-size: .9rem; }
+    .topic .ico { font-family: var(--mono); color: var(--accent); font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero" style="grid-template-columns:1fr">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures &amp; Algorithms</p>
+        <h1>Learning Code</h1>
+        <p class="lead">Interactive topic guides: concepts, visualizers, tips &amp; tricks, and the important questions with hints and solutions in C++, Java and Python.</p>
+      </div>
+    </section>
+    <div class="topics">
+      <a class="card topic" href="2d-arrays/index.html">
+        <span class="ico">[i][j]</span>
+        <h2>2D Arrays &amp; Matrices</h2>
+        <p>Indexing, memory layout, traversals (spiral, diagonal, rotate), prefix sums and grid problems. 20 questions.</p>
+        <span class="go">Open guide →</span>
+      </a>
+      <a class="card topic" href="binary-search/index.html">
+        <span class="ico">lo · mid · hi</span>
+        <h2>Binary Search</h2>
+        <p>Invariants, lower/upper bound, rotated arrays, binary search on the answer, step-by-step visualizer. 20 questions.</p>
+        <span class="go">Open guide →</span>
+      </a>
+    </div>
+  </main>
+  <script>
+    try { const t = localStorage.getItem("theme"); if (t) document.documentElement.setAttribute("data-theme", JSON.parse(t)); } catch (e) {}
+  </script>
+</body>
+</html>
