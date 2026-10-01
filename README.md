@@ -28,6 +28,10 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
   sort, Dijkstra, Union-Find, directed cycle detection, a "which algorithm when" table, BFS/DFS/Dijkstra
   and topological-sort visualizers, tips & tricks, 20 important questions and a quiz.
 
+Technical words throughout every page have a dotted underline: tap or click one for a plain-English
+definition with an example. Each topic also ends with a "Words used on this page" list. The shared
+glossary lives in [`shared/glossary.js`](shared/glossary.js) — add an entry there and it appears on every page.
+
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.
 
