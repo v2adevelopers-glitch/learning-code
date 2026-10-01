@@ -12,6 +12,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Linked Lists](linked-list/index.html) — nodes and pointers, core operations, the four techniques
   (dummy node, fast/slow pointers, in-place reversal, merging), an animated visualizer
   (insert, delete, reverse, find middle, remove k-th from end), tips & tricks, 20 important questions and a quiz.
+- [Greedy Algorithms](greedy/index.html) — the greedy-choice property, proof techniques (exchange
+  argument, stays ahead), six common patterns, visualizers comparing interval-scheduling rules and
+  greedy vs optimal coin change, tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / Python;
 solved questions are tracked in your browser.

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Greedy Algorithms Guide</title>
+  <meta name="description" content="Learn greedy algorithms properly: when greedy works, how to prove it (exchange argument, stays ahead), the common patterns, interactive visualizers for interval scheduling and coin change, tips, and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Greedy&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#proof">Proving it</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#visualizer">Visualizers</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="python">Python</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Algorithms · Topic Guide</p>
+        <h1>Greedy Algorithms</h1>
+        <p class="lead">Make the choice that looks best <em>right now</em>, never look back, and hope it adds up to the best overall.
+          When it works, greedy gives the simplest and fastest solutions there are. The skill is knowing
+          <strong>which</strong> choice to make and <strong>proving</strong> it’s safe — this page teaches both.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-g" aria-hidden="true">
+        <div class="timeline mini" id="heroTimeline"></div>
+        <p class="hero-bs-cap" id="heroCap">pick the meeting that ends first…</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>What is a greedy algorithm?</h3>
+          <p>A greedy algorithm builds a solution step by step. At every step it takes the option that is
+            <strong>locally best</strong> by some rule, commits to it, and <strong>never undoes</strong> it.</p>
+          <ul class="checks">
+            <li>No backtracking, no table of sub-results — usually just a sort and a loop.</li>
+            <li>Typical cost: <strong>O(n log n)</strong> for the sort, <strong>O(n)</strong> for the scan.</li>
+            <li>It’s only correct for problems with the right structure — and wrong answers look perfectly plausible.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Two properties make greedy correct</h3>
+          <ul class="checks">
+            <li><strong>Greedy-choice property:</strong> some optimal solution starts with the greedy choice.
+              Making it never rules out the optimum.</li>
+            <li><strong>Optimal substructure:</strong> after the choice, what remains is a smaller copy of the same problem,
+              and its optimal solution combines with the choice into an optimal whole.</li>
+          </ul>
+          <p class="muted small">Dynamic programming needs only the second property; greedy needs both — which is why it’s faster but rarer.</p>
+        </div>
+      </div>
+
+      <h3 class="sub">When greedy fails</h3>
+      <div class="grid-2">
+        <div class="card">
+          <p>Coin change with coins <code>{1, 3, 4}</code> and amount <code>6</code>:</p>
+          <div class="coin-compare">
+            <div><span class="tag-lbl bad-lbl">Greedy (largest first)</span>
+              <div class="coins"><span class="coin">4</span><span class="coin">1</span><span class="coin">1</span></div>
+              <p class="small muted">3 coins</p></div>
+            <div><span class="tag-lbl good-lbl">Optimal</span>
+              <div class="coins"><span class="coin">3</span><span class="coin">3</span></div>
+              <p class="small muted">2 coins</p></div>
+          </div>
+          <p class="small">Taking the 4 looked best but it blocked the better answer. With US/Indian coins
+            (<code>1, 2, 5, 10…</code>) greedy happens to work — the coin system has the greedy-choice property. Try both in the
+            <a href="#visualizer">visualizer</a>.</p>
+        </div>
+        <div class="card table-card">
+          <table class="cmp-table">
+            <thead><tr><th></th><th>Greedy</th><th>Dynamic programming</th></tr></thead>
+            <tbody>
+              <tr><td>Decisions</td><td>One, committed</td><td>Tries all, keeps the best</td></tr>
+              <tr><td>Revisits choices?</td><td>Never</td><td>Yes, via the table</td></tr>
+              <tr><td>Typical time</td><td class="good">O(n log n)</td><td>O(n · W), O(n²)…</td></tr>
+              <tr><td>Correctness</td><td class="bad">Needs a proof</td><td class="good">Follows from the recurrence</td></tr>
+              <tr><td>Examples</td><td>Intervals, Huffman, Dijkstra, MST</td><td>0/1 knapsack, LCS, coin change</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROOF -->
+    <section id="proof" class="section">
+      <h2><span class="num">02</span> How to know (and prove) greedy works</h2>
+      <p class="lead small-lead">Interviewers rarely want a formal proof, but they do want a convincing <em>why</em>. These three tools cover almost everything.</p>
+
+      <div class="tips three">
+        <div class="tip card"><div class="tip-ico">🔄</div><h3>Exchange argument</h3>
+          <p>Take any optimal solution that differs from greedy. Show you can <strong>swap</strong> one of its choices for the greedy one
+            without making it worse. Repeat until it <em>is</em> the greedy solution — so greedy is optimal too.</p></div>
+        <div class="tip card"><div class="tip-ico">🏃</div><h3>Greedy stays ahead</h3>
+          <p>Show that after every step, greedy’s partial solution is <strong>at least as good</strong> as any other’s
+            (e.g. it has finished by an earlier time). If it’s never behind, it can’t lose at the end.</p></div>
+        <div class="tip card"><div class="tip-ico">🔍</div><h3>Hunt for a counterexample</h3>
+          <p>Before coding, try 3–4 tiny inputs designed to break your rule: a long item first, a short item in the middle, ties.
+            If you find one, switch rule or switch to DP.</p></div>
+      </div>
+
+      <div class="card mt">
+        <h3>Worked proof — interval scheduling (pick the most non-overlapping intervals)</h3>
+        <ol class="plan">
+          <li><strong>Rule:</strong> sort by end time; repeatedly take the interval that ends first and doesn’t overlap the last one taken.</li>
+          <li><strong>Exchange:</strong> let O be an optimal answer and g the first interval greedy takes. If O’s first interval o₁ ≠ g,
+            replace o₁ with g. Since g ends no later than o₁, g overlaps nothing that o₁ didn’t — O stays valid and the same size.</li>
+          <li><strong>Induction:</strong> after fixing the first choice, the rest is the same problem on the intervals that start after g ends.
+            Repeat the argument → greedy’s answer has the same size as O.</li>
+          <li><strong>Why not “earliest start” or “shortest”?</strong> One long interval that starts first, or one short interval
+            that overlaps two others, breaks them. The visualizer shows both.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- PATTERNS -->
+    <section id="patterns" class="section">
+      <h2><span class="num">03</span> The common greedy patterns</h2>
+      <p class="lead small-lead">Most greedy questions are one of these shapes. Spot the shape and the choice rule follows.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>1 · Sort by end time (intervals)</h3>
+          <p>Max non-overlapping intervals, min removals, min arrows, activity selection. The interval that ends first leaves the most room.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>sort(iv.begin(), iv.end(), [](auto&amp; a, auto&amp; b) { return a[1] &lt; b[1]; });
+int count = 0;
+long long lastEnd = LLONG_MIN;
+for (auto&amp; x : iv)
+    if (x[0] &gt;= lastEnd) { count++; lastEnd = x[1]; }</code></pre>
+<pre data-lang="java"><code>Arrays.sort(iv, (a, b) -&gt; Integer.compare(a[1], b[1]));
+int count = 0;
+long lastEnd = Long.MIN_VALUE;
+for (int[] x : iv)
+    if (x[0] &gt;= lastEnd) { count++; lastEnd = x[1]; }</code></pre>
+<pre data-lang="python"><code>iv.sort(key=lambda x: x[1])
+count, last_end = 0, float("-inf")
+for s, e in iv:
+    if s &gt;= last_end:
+        count, last_end = count + 1, e</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>2 · Sort + two pointers (matching)</h3>
+          <p>Assign cookies, boats to save people, pair smallest with largest. Sort both sides, then match greedily from the ends.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// boats: heaviest person always boards; take the lightest too if it fits
+sort(p.begin(), p.end());
+int i = 0, j = p.size() - 1, boats = 0;
+while (i &lt;= j) {
+    if (p[i] + p[j] &lt;= limit) i++;
+    j--; boats++;
+}</code></pre>
+<pre data-lang="java"><code>// boats: heaviest person always boards; take the lightest too if it fits
+Arrays.sort(p);
+int i = 0, j = p.length - 1, boats = 0;
+while (i &lt;= j) {
+    if (p[i] + p[j] &lt;= limit) i++;
+    j--; boats++;
+}</code></pre>
+<pre data-lang="python"><code># boats: heaviest person always boards; take the lightest too if it fits
+p.sort()
+i, j, boats = 0, len(p) - 1, 0
+while i &lt;= j:
+    if p[i] + p[j] &lt;= limit:
+        i += 1
+    j -= 1
+    boats += 1</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>3 · Farthest reach (jump games)</h3>
+          <p>Track the furthest index you can reach so far. If the current index is beyond it, you’re stuck. For minimum jumps, count “levels” like BFS.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int reach = 0;
+for (int i = 0; i &lt; n; i++) {
+    if (i &gt; reach) return false;      // can't even get here
+    reach = max(reach, i + a[i]);
+}
+return true;</code></pre>
+<pre data-lang="java"><code>int reach = 0;
+for (int i = 0; i &lt; n; i++) {
+    if (i &gt; reach) return false;      // can't even get here
+    reach = Math.max(reach, i + a[i]);
+}
+return true;</code></pre>
+<pre data-lang="python"><code>reach = 0
+for i, x in enumerate(a):
+    if i &gt; reach:
+        return False                  # can't even get here
+    reach = max(reach, i + x)
+return True</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>4 · Reset when it goes negative (running balance)</h3>
+          <p>Gas station, max subarray (Kadane). If the running total drops below zero, no start in the current window can work — restart after it.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int total = 0, tank = 0, start = 0;
+for (int i = 0; i &lt; n; i++) {
+    int d = gas[i] - cost[i];
+    total += d; tank += d;
+    if (tank &lt; 0) { start = i + 1; tank = 0; }
+}
+return total &lt; 0 ? -1 : start;</code></pre>
+<pre data-lang="java"><code>int total = 0, tank = 0, start = 0;
+for (int i = 0; i &lt; n; i++) {
+    int d = gas[i] - cost[i];
+    total += d; tank += d;
+    if (tank &lt; 0) { start = i + 1; tank = 0; }
+}
+return total &lt; 0 ? -1 : start;</code></pre>
+<pre data-lang="python"><code>total = tank = start = 0
+for i in range(n):
+    d = gas[i] - cost[i]
+    total += d
+    tank += d
+    if tank &lt; 0:
+        start, tank = i + 1, 0
+return -1 if total &lt; 0 else start</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>5 · Heap: always take the best available</h3>
+          <p>Meeting rooms, IPO, connect ropes, Huffman coding, Dijkstra. When the best choice changes as you go, keep candidates in a priority queue.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// min cost to connect ropes: always join the two shortest
+priority_queue&lt;long long, vector&lt;long long&gt;, greater&lt;&gt;&gt; pq(r.begin(), r.end());
+long long cost = 0;
+while (pq.size() &gt; 1) {
+    long long a = pq.top(); pq.pop();
+    long long b = pq.top(); pq.pop();
+    cost += a + b; pq.push(a + b);
+}</code></pre>
+<pre data-lang="java"><code>// min cost to connect ropes: always join the two shortest
+PriorityQueue&lt;Long&gt; pq = new PriorityQueue&lt;&gt;();
+for (int x : r) pq.add((long) x);
+long cost = 0;
+while (pq.size() &gt; 1) {
+    long a = pq.poll(), b = pq.poll();
+    cost += a + b; pq.add(a + b);
+}</code></pre>
+<pre data-lang="python"><code># min cost to connect ropes: always join the two shortest
+import heapq
+heapq.heapify(r)
+cost = 0
+while len(r) &gt; 1:
+    a, b = heapq.heappop(r), heapq.heappop(r)
+    cost += a + b
+    heapq.heappush(r, a + b)</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>6 · Sort by ratio / value</h3>
+          <p>Fractional knapsack (value per weight), max units on a truck (units per box), job sequencing (profit). Take the best rate first.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// fractional knapsack: highest value/weight first
+sort(items.begin(), items.end(), [](auto&amp; a, auto&amp; b) {
+    return (double)a.v / a.w &gt; (double)b.v / b.w;
+});
+double total = 0;
+for (auto&amp; it : items) {
+    if (cap == 0) break;
+    int take = min(cap, it.w);
+    total += (double)it.v * take / it.w;
+    cap -= take;
+}</code></pre>
+<pre data-lang="java"><code>// fractional knapsack: highest value/weight first
+Arrays.sort(items, (a, b) -&gt; Double.compare((double) b[0] / b[1], (double) a[0] / a[1]));
+double total = 0;
+for (int[] it : items) {          // it = {value, weight}
+    if (cap == 0) break;
+    int take = Math.min(cap, it[1]);
+    total += (double) it[0] * take / it[1];
+    cap -= take;
+}</code></pre>
+<pre data-lang="python"><code># fractional knapsack: highest value/weight first
+items.sort(key=lambda it: it[0] / it[1], reverse=True)   # (value, weight)
+total = 0.0
+for v, w in items:
+    if cap == 0:
+        break
+    take = min(cap, w)
+    total += v * take / w
+    cap -= take</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZERS -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">04</span> Interactive visualizers</h2>
+
+      <h3 class="sub">A · Interval scheduling: which greedy rule is right?</h3>
+      <p>Goal: choose as many non-overlapping intervals as possible. Run the three candidate rules on the same input and compare.</p>
+      <div class="viz card">
+        <div class="viz-buttons">
+          <button data-rule="end" class="active">Earliest end ✓</button>
+          <button data-rule="start">Earliest start</button>
+          <button data-rule="short">Shortest first</button>
+          <span class="divider"></span>
+          <button id="ivPreset" class="op">Tricky preset</button>
+          <button id="ivRandom" class="op">Random intervals</button>
+          <label class="inline-ctl">Speed
+            <select id="ivSpeed">
+              <option value="900">Slow</option>
+              <option value="550" selected>Normal</option>
+              <option value="200">Fast</option>
+            </select>
+          </label>
+        </div>
+        <div class="timeline" id="ivTimeline"></div>
+        <div class="bs-status" id="ivStatus">Pick a rule to run it.</div>
+        <div class="legend">
+          <span><i class="sw sel"></i>chosen</span>
+          <span><i class="sw rej"></i>rejected (overlaps)</span>
+          <span><i class="sw cur"></i>being considered</span>
+        </div>
+      </div>
+
+      <h3 class="sub">B · Coin change: does greedy give the fewest coins?</h3>
+      <p>Greedy takes the largest coin that fits, again and again. The optimal answer (from dynamic programming) is shown alongside.</p>
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Coins <input type="text" id="coinSet" value="1, 3, 4" class="wide"></label>
+          <label>Amount <input type="number" id="coinAmt" value="6" min="1" max="500"></label>
+        </div>
+        <div class="viz-buttons">
+          <button id="coinRun" class="active">Compare ▶</button>
+          <span class="divider"></span>
+          <button class="op" data-coins="1, 3, 4" data-amt="6">{1,3,4} → 6</button>
+          <button class="op" data-coins="1, 5, 10, 25" data-amt="63">US coins → 63</button>
+          <button class="op" data-coins="1, 2, 5, 10, 20, 50" data-amt="88">₹ coins → 88</button>
+          <button class="op" data-coins="1, 7, 10" data-amt="14">{1,7,10} → 14</button>
+          <button class="op" data-coins="5, 7" data-amt="9">{5,7} → 9</button>
+        </div>
+        <div class="coin-result" id="coinResult"></div>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">05</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🧭</div><h3>Name the choice rule</h3>
+          <p>Say it in one sentence: “always take the interval that ends first”. If you can’t, you don’t have a greedy algorithm yet.</p></div>
+        <div class="tip card"><div class="tip-ico">🗂️</div><h3>Sorting is step one</h3>
+          <p>90% of greedy solutions begin by sorting. The real question is <em>by which key</em>: start, end, ratio, deadline, size?</p></div>
+        <div class="tip card"><div class="tip-ico">💣</div><h3>Try to break it first</h3>
+          <p>Spend two minutes on tiny counterexamples before coding. A wrong greedy passes the sample and fails hidden tests.</p></div>
+        <div class="tip card"><div class="tip-ico">🔄</div><h3>Use the exchange argument</h3>
+          <p>“If an optimal answer didn’t pick X, swapping it in doesn’t hurt.” This one sentence convinces most interviewers.</p></div>
+        <div class="tip card"><div class="tip-ico">🎒</div><h3>0/1 vs fractional</h3>
+          <p>Can you take part of an item? Greedy by ratio. All or nothing? That’s DP. Same story for coin change.</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Think from both ends</h3>
+          <p>Some problems need two passes (Candy, trapping rain water): one left-to-right, one right-to-left, then combine.</p></div>
+        <div class="tip card"><div class="tip-ico">⛰️</div><h3>Track a running best</h3>
+          <p>Farthest reach, min price so far, current balance. One variable updated per step often replaces a whole DP table.</p></div>
+        <div class="tip card"><div class="tip-ico">📦</div><h3>Heap when choices evolve</h3>
+          <p>If the “best available” option changes as you go (new items unlock, old ones expire), keep them in a priority queue.</p></div>
+        <div class="tip card"><div class="tip-ico">🤝</div><h3>Ties and comparators</h3>
+          <p>Decide what happens on ties, and use <code>Integer.compare</code> instead of <code>a - b</code> to avoid overflow.</p></div>
+        <div class="tip card"><div class="tip-ico">🔢</div><h3>Counting beats simulating</h3>
+          <p>Task scheduler, hand of straights: count frequencies first; a formula or a sorted map is often enough.</p></div>
+        <div class="tip card"><div class="tip-ico">📐</div><h3>Touching intervals</h3>
+          <p>Does <code>[1,2]</code> overlap <code>[2,3]</code>? Read the problem — it decides <code>&gt;=</code> vs <code>&gt;</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">🧠</div><h3>Know the famous ones</h3>
+          <p>Dijkstra, Prim/Kruskal (MST) and Huffman coding are greedy too. Recognising the family helps you trust the approach.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Using greedy where only DP works (0/1 knapsack, arbitrary coin systems).</li>
+            <li>Sorting by the wrong key (start instead of end for max non-overlapping).</li>
+            <li>Off-by-one on touching intervals (<code>&gt;</code> vs <code>&gt;=</code>).</li>
+            <li>Overflow in comparators (<code>a[1] - b[1]</code> with large values).</li>
+            <li>Forgetting the global feasibility check (gas station’s total &lt; 0).</li>
+            <li>Only one pass when the constraint looks both ways (Candy).</li>
+            <li>Trusting a rule because it passed the examples — prove it or break it.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> assign cookies, lemonade change, can place flowers.</li>
+            <li><strong>Day 2:</strong> stock II, max units on a truck, fractional knapsack.</li>
+            <li><strong>Day 3:</strong> jump game I &amp; II (farthest reach).</li>
+            <li><strong>Day 4:</strong> non-overlapping intervals, min arrows, merge intervals.</li>
+            <li><strong>Day 5:</strong> meeting rooms II, boats to save people.</li>
+            <li><strong>Day 6:</strong> gas station, partition labels.</li>
+            <li><strong>Day 7:</strong> task scheduler, hand of straights.</li>
+            <li><strong>Day 8:</strong> valid parenthesis string (range of possibilities).</li>
+            <li><strong>Day 9:</strong> candy (two passes), IPO (two heaps idea).</li>
+            <li><strong>Day 10:</strong> write an exchange-argument proof for 3 of the above; redo mistakes.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">06</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">07</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Name the rule, try to break it, then prove it with an exchange.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
