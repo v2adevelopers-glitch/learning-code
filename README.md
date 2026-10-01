@@ -9,6 +9,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Binary Search](binary-search/index.html) — the monotonic-condition mental model, templates
   (exact match, lower/upper bound, first/last true), library helpers, a step-by-step visualizer,
   binary search on the answer, tips & tricks, 20 important questions and a quiz.
+- [Linked Lists](linked-list/index.html) — nodes and pointers, core operations, the four techniques
+  (dummy node, fast/slow pointers, in-place reversal, merging), an animated visualizer
+  (insert, delete, reverse, find middle, remove k-th from end), tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / Python;
 solved questions are tracked in your browser.

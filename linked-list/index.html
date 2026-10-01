@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linked List Guide</title>
+  <meta name="description" content="Learn linked lists properly: nodes and pointers, singly vs doubly lists, core operations, dummy nodes, fast/slow pointers, in-place reversal, an interactive visualizer, tips and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Linked&nbsp;List&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#operations">Operations</a>
+        <a href="#visualizer">Visualizer</a>
+        <a href="#techniques">Techniques</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="python">Python</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures · Topic Guide</p>
+        <h1>Linked Lists</h1>
+        <p class="lead">A chain of nodes, each pointing to the next. There’s no indexing and no contiguous memory —
+          just pointers. Learn to <em>draw the boxes and arrows</em>, master four techniques (dummy node, fast/slow pointers,
+          in-place reversal, merging) and almost every linked list question becomes routine.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-ll" aria-hidden="true">
+        <div class="ll-row" id="heroLL"></div>
+        <p class="hero-bs-cap" id="heroCap">reversing in place…</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>What is a linked list?</h3>
+          <p>A linked list is a sequence of <strong>nodes</strong>. Each node stores a <strong>value</strong> and a
+            <strong>pointer</strong> (reference) to the next node. The list is accessed through its <code>head</code>;
+            the last node points to <code>null</code>.</p>
+          <div class="ll-static">
+            <span class="lbl">head</span><span class="arrow">→</span>
+            <span class="node"><b>7</b><i>next</i></span><span class="arrow">→</span>
+            <span class="node"><b>3</b><i>next</i></span><span class="arrow">→</span>
+            <span class="node"><b>9</b><i>next</i></span><span class="arrow">→</span>
+            <span class="null">null</span>
+          </div>
+          <ul class="checks">
+            <li>Nodes can live anywhere in memory — the pointers hold the order.</li>
+            <li>To reach the k-th node you must walk k steps from the head: <strong>O(n)</strong>.</li>
+            <li>Inserting or deleting at a known node is just re-pointing: <strong>O(1)</strong>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Kinds of linked lists</h3>
+          <ul class="checks">
+            <li><strong>Singly linked:</strong> each node has <code>next</code>. Most interview questions use this.</li>
+            <li><strong>Doubly linked:</strong> <code>prev</code> and <code>next</code>. O(1) delete of a given node; used in LRU caches, <code>std::list</code>, Java <code>LinkedList</code>.</li>
+            <li><strong>Circular:</strong> the tail points back to the head. Used for round-robin scheduling and the Josephus problem.</li>
+          </ul>
+          <div class="ll-static small-ll">
+            <span class="null">null</span><span class="arrow">⇄</span>
+            <span class="node dbl"><i>prev</i><b>1</b><i>next</i></span><span class="arrow">⇄</span>
+            <span class="node dbl"><i>prev</i><b>2</b><i>next</i></span><span class="arrow">⇄</span>
+            <span class="null">null</span>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub">The node</h3>
+      <div class="code" data-code>
+<pre data-lang="cpp"><code>struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+ListNode* head = new ListNode(7);
+head-&gt;next = new ListNode(3);
+head-&gt;next-&gt;next = new ListNode(9);   // 7 -&gt; 3 -&gt; 9 -&gt; null</code></pre>
+<pre data-lang="java"><code>class ListNode {
+    int val;
+    ListNode next;
+    ListNode(int x) { val = x; }
+}
+
+ListNode head = new ListNode(7);
+head.next = new ListNode(3);
+head.next.next = new ListNode(9);    // 7 -&gt; 3 -&gt; 9 -&gt; null</code></pre>
+<pre data-lang="python"><code>class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+head = ListNode(7, ListNode(3, ListNode(9)))   # 7 -&gt; 3 -&gt; 9 -&gt; None</code></pre>
+      </div>
+
+      <h3 class="sub">Array vs linked list</h3>
+      <div class="card table-card">
+        <table class="cmp-table">
+          <thead><tr><th>Operation</th><th>Array / dynamic array</th><th>Singly linked list</th></tr></thead>
+          <tbody>
+            <tr><td>Access k-th element</td><td class="good">O(1)</td><td class="bad">O(n)</td></tr>
+            <tr><td>Search for a value</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>Insert / delete at front</td><td class="bad">O(n) (shift)</td><td class="good">O(1)</td></tr>
+            <tr><td>Insert / delete at end</td><td class="good">O(1) amortised</td><td>O(1) with tail pointer (delete: O(n))</td></tr>
+            <tr><td>Insert / delete after a known node</td><td class="bad">O(n)</td><td class="good">O(1)</td></tr>
+            <tr><td>Memory</td><td class="good">Compact, cache-friendly</td><td class="bad">Extra pointer per node, scattered</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- OPERATIONS -->
+    <section id="operations" class="section">
+      <h2><span class="num">02</span> Core operations</h2>
+      <p class="lead small-lead">Write each of these from memory. The golden rule: <strong>connect the new pointer before you break the old one</strong>.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Traverse, length &amp; search</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int length(ListNode* head) {
+    int n = 0;
+    for (ListNode* cur = head; cur; cur = cur-&gt;next) n++;
+    return n;
+}
+ListNode* find(ListNode* head, int x) {
+    ListNode* cur = head;
+    while (cur &amp;&amp; cur-&gt;val != x) cur = cur-&gt;next;
+    return cur;                       // nullptr if not found
+}</code></pre>
+<pre data-lang="java"><code>int length(ListNode head) {
+    int n = 0;
+    for (ListNode cur = head; cur != null; cur = cur.next) n++;
+    return n;
+}
+ListNode find(ListNode head, int x) {
+    ListNode cur = head;
+    while (cur != null &amp;&amp; cur.val != x) cur = cur.next;
+    return cur;                       // null if not found
+}</code></pre>
+<pre data-lang="python"><code>def length(head):
+    n, cur = 0, head
+    while cur:
+        n, cur = n + 1, cur.next
+    return n
+
+def find(head, x):
+    cur = head
+    while cur and cur.val != x:
+        cur = cur.next
+    return cur                        # None if not found</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Insert at head / after a node</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode* pushFront(ListNode* head, int x) {
+    ListNode* node = new ListNode(x);
+    node-&gt;next = head;                // 1. connect new
+    return node;                      // 2. new head
+}
+void insertAfter(ListNode* prev, int x) {
+    ListNode* node = new ListNode(x);
+    node-&gt;next = prev-&gt;next;          // 1. connect new first
+    prev-&gt;next = node;                // 2. then break old link
+}</code></pre>
+<pre data-lang="java"><code>ListNode pushFront(ListNode head, int x) {
+    ListNode node = new ListNode(x);
+    node.next = head;                 // 1. connect new
+    return node;                      // 2. new head
+}
+void insertAfter(ListNode prev, int x) {
+    ListNode node = new ListNode(x);
+    node.next = prev.next;            // 1. connect new first
+    prev.next = node;                 // 2. then break old link
+}</code></pre>
+<pre data-lang="python"><code>def push_front(head, x):
+    return ListNode(x, head)          # new node points at old head
+
+def insert_after(prev, x):
+    node = ListNode(x)
+    node.next = prev.next             # 1. connect new first
+    prev.next = node                  # 2. then break old link</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Insert at tail</h3>
+          <p>Without a tail pointer you must walk to the last node. Handle the empty list separately (or use a dummy node).</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode* pushBack(ListNode* head, int x) {
+    ListNode* node = new ListNode(x);
+    if (!head) return node;
+    ListNode* cur = head;
+    while (cur-&gt;next) cur = cur-&gt;next;
+    cur-&gt;next = node;
+    return head;
+}</code></pre>
+<pre data-lang="java"><code>ListNode pushBack(ListNode head, int x) {
+    ListNode node = new ListNode(x);
+    if (head == null) return node;
+    ListNode cur = head;
+    while (cur.next != null) cur = cur.next;
+    cur.next = node;
+    return head;
+}</code></pre>
+<pre data-lang="python"><code>def push_back(head, x):
+    node = ListNode(x)
+    if not head:
+        return node
+    cur = head
+    while cur.next:
+        cur = cur.next
+    cur.next = node
+    return head</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Delete by value (with a dummy node)</h3>
+          <p>A <strong>dummy</strong> node before the head means deleting the head is no longer a special case.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode* removeValue(ListNode* head, int x) {
+    ListNode dummy(0);
+    dummy.next = head;
+    ListNode* prev = &amp;dummy;
+    while (prev-&gt;next &amp;&amp; prev-&gt;next-&gt;val != x) prev = prev-&gt;next;
+    if (prev-&gt;next) {
+        ListNode* del = prev-&gt;next;
+        prev-&gt;next = del-&gt;next;       // bypass the node
+        delete del;
+    }
+    return dummy.next;
+}</code></pre>
+<pre data-lang="java"><code>ListNode removeValue(ListNode head, int x) {
+    ListNode dummy = new ListNode(0);
+    dummy.next = head;
+    ListNode prev = dummy;
+    while (prev.next != null &amp;&amp; prev.next.val != x) prev = prev.next;
+    if (prev.next != null) prev.next = prev.next.next;   // bypass
+    return dummy.next;
+}</code></pre>
+<pre data-lang="python"><code>def remove_value(head, x):
+    dummy = ListNode(0, head)
+    prev = dummy
+    while prev.next and prev.next.val != x:
+        prev = prev.next
+    if prev.next:
+        prev.next = prev.next.next    # bypass
+    return dummy.next</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZER -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">03</span> Interactive visualizer</h2>
+      <p class="lead small-lead">Run an operation and step through it. Watch how <code>prev</code>, <code>curr</code>, <code>slow</code> and <code>fast</code> move and how arrows get re-pointed.</p>
+
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Value <input type="number" id="llVal" value="5"></label>
+          <label>Index <input type="number" id="llIdx" value="2" min="0"></label>
+          <label>Speed
+            <select id="llSpeed">
+              <option value="1100">Slow</option>
+              <option value="700" selected>Normal</option>
+              <option value="300">Fast</option>
+            </select>
+          </label>
+        </div>
+        <div class="viz-buttons" id="llButtons">
+          <button data-op="head">Insert at head</button>
+          <button data-op="tail">Insert at tail</button>
+          <button data-op="at">Insert at index</button>
+          <button data-op="del">Delete value</button>
+          <span class="divider"></span>
+          <button data-op="reverse">Reverse</button>
+          <button data-op="middle">Find middle (slow/fast)</button>
+          <button data-op="nth">Remove k-th from end (k = Index)</button>
+          <span class="divider"></span>
+          <button data-op="random" class="op">Random list</button>
+        </div>
+        <div class="ll-stage" id="llStage"></div>
+        <div class="bs-status" id="llStatus">Pick an operation.</div>
+        <ol class="bs-log" id="llLog"></ol>
+      </div>
+    </section>
+
+    <!-- TECHNIQUES -->
+    <section id="techniques" class="section">
+      <h2><span class="num">04</span> The four techniques</h2>
+      <p class="lead small-lead">Nearly every linked list question is one of these, or two of them combined.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>1 · Dummy (sentinel) node</h3>
+          <p>Create a fake node in front of the head whenever the head itself might change (deleting, merging, building a new list).
+            Return <code>dummy.next</code> at the end — no special cases for the first node.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode dummy(0);
+ListNode* tail = &amp;dummy;
+// ... tail-&gt;next = someNode; tail = tail-&gt;next; ...
+return dummy.next;</code></pre>
+<pre data-lang="java"><code>ListNode dummy = new ListNode(0);
+ListNode tail = dummy;
+// ... tail.next = someNode; tail = tail.next; ...
+return dummy.next;</code></pre>
+<pre data-lang="python"><code>dummy = tail = ListNode(0)
+# ... tail.next = some_node; tail = tail.next ...
+return dummy.next</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>2 · Fast &amp; slow pointers</h3>
+          <p><code>slow</code> moves 1 step, <code>fast</code> moves 2. When fast reaches the end, slow is at the middle.
+            If there’s a cycle, fast eventually laps slow and they meet (Floyd’s algorithm).</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode *slow = head, *fast = head;
+while (fast &amp;&amp; fast-&gt;next) {
+    slow = slow-&gt;next;
+    fast = fast-&gt;next-&gt;next;
+    if (slow == fast) { /* cycle! */ }
+}
+// no cycle: slow is the middle (2nd middle for even length)</code></pre>
+<pre data-lang="java"><code>ListNode slow = head, fast = head;
+while (fast != null &amp;&amp; fast.next != null) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow == fast) { /* cycle! */ }
+}
+// no cycle: slow is the middle (2nd middle for even length)</code></pre>
+<pre data-lang="python"><code>slow = fast = head
+while fast and fast.next:
+    slow = slow.next
+    fast = fast.next.next
+    if slow is fast:
+        ...  # cycle!
+# no cycle: slow is the middle (2nd middle for even length)</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>3 · In-place reversal</h3>
+          <p>Three pointers: <code>prev</code>, <code>curr</code>, <code>next</code>. Save next, flip the arrow, move both forward.
+            Memorise it — it shows up inside palindrome, reorder list, k-group reversal and more.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode* reverse(ListNode* head) {
+    ListNode *prev = nullptr, *curr = head;
+    while (curr) {
+        ListNode* next = curr-&gt;next;  // 1. save
+        curr-&gt;next = prev;            // 2. flip
+        prev = curr;                  // 3. advance
+        curr = next;
+    }
+    return prev;                      // new head
+}</code></pre>
+<pre data-lang="java"><code>ListNode reverse(ListNode head) {
+    ListNode prev = null, curr = head;
+    while (curr != null) {
+        ListNode next = curr.next;    // 1. save
+        curr.next = prev;             // 2. flip
+        prev = curr;                  // 3. advance
+        curr = next;
+    }
+    return prev;                      // new head
+}</code></pre>
+<pre data-lang="python"><code>def reverse(head):
+    prev, curr = None, head
+    while curr:
+        nxt = curr.next               # 1. save
+        curr.next = prev              # 2. flip
+        prev, curr = curr, nxt        # 3. advance
+    return prev                       # new head</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>4 · Merging two sorted lists</h3>
+          <p>Dummy node + a tail pointer. Always attach the smaller head, then append whatever is left. Building block for merge sort and merge k lists.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>ListNode* merge(ListNode* a, ListNode* b) {
+    ListNode dummy(0), *tail = &amp;dummy;
+    while (a &amp;&amp; b) {
+        if (a-&gt;val &lt;= b-&gt;val) { tail-&gt;next = a; a = a-&gt;next; }
+        else                  { tail-&gt;next = b; b = b-&gt;next; }
+        tail = tail-&gt;next;
+    }
+    tail-&gt;next = a ? a : b;
+    return dummy.next;
+}</code></pre>
+<pre data-lang="java"><code>ListNode merge(ListNode a, ListNode b) {
+    ListNode dummy = new ListNode(0), tail = dummy;
+    while (a != null &amp;&amp; b != null) {
+        if (a.val &lt;= b.val) { tail.next = a; a = a.next; }
+        else                { tail.next = b; b = b.next; }
+        tail = tail.next;
+    }
+    tail.next = (a != null) ? a : b;
+    return dummy.next;
+}</code></pre>
+<pre data-lang="python"><code>def merge(a, b):
+    dummy = tail = ListNode(0)
+    while a and b:
+        if a.val &lt;= b.val:
+            tail.next, a = a, a.next
+        else:
+            tail.next, b = b, b.next
+        tail = tail.next
+    tail.next = a or b
+    return dummy.next</code></pre>
+          </div>
+        </article>
+      </div>
+
+      <div class="callout">
+        <strong>Gap of k:</strong> a variant of two pointers. Move <code>fast</code> k steps ahead, then move both together.
+        When fast hits the end, slow is k nodes from the end — the trick behind “remove n-th node from end” and “rotate list”.
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">05</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">✏️</div><h3>Always draw it</h3>
+          <p>Boxes and arrows on paper. Cross out an arrow when you re-point it. Pointer bugs are obvious on a drawing, invisible in your head.</p></div>
+        <div class="tip card"><div class="tip-ico">🔗</div><h3>Connect before you cut</h3>
+          <p>Set <code>node.next = prev.next</code> before <code>prev.next = node</code>. Lose the only reference and the rest of the list is gone.</p></div>
+        <div class="tip card"><div class="tip-ico">🪆</div><h3>Use a dummy node</h3>
+          <p>Whenever the head might change. It removes the “if head is null / if deleting head” branches.</p></div>
+        <div class="tip card"><div class="tip-ico">🛑</div><h3>Guard every <code>.next</code></h3>
+          <p>Before <code>p.next.next</code>, make sure <code>p</code> and <code>p.next</code> exist. <code>while (fast &amp;&amp; fast.next)</code> is the classic guard.</p></div>
+        <div class="tip card"><div class="tip-ico">🐢</div><h3>Fast/slow for “middle” and “cycle”</h3>
+          <p>Any question about the middle, a cycle, or the k-th from the end → two pointers, O(1) space.</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Reversal is a building block</h3>
+          <p>Palindrome = find middle + reverse second half + compare. Reorder list = middle + reverse + merge.</p></div>
+        <div class="tip card"><div class="tip-ico">🧪</div><h3>Test the edge lists</h3>
+          <p>Empty list, one node, two nodes, and odd vs even length. Most crashes come from the 0/1/2-node cases.</p></div>
+        <div class="tip card"><div class="tip-ico">📍</div><h3>Name your pointers</h3>
+          <p><code>prev / curr / nxt</code>, <code>slow / fast</code>, <code>tail</code>. Clear names make the update order easy to reason about.</p></div>
+        <div class="tip card"><div class="tip-ico">🗺️</div><h3>HashMap for extra links</h3>
+          <p>Random pointers, intersection, cycle start — a map/set from node → info is the easy O(n)-space solution. Then optimise.</p></div>
+        <div class="tip card"><div class="tip-ico">♻️</div><h3>Recursion mirrors the list</h3>
+          <p>“Solve for <code>head.next</code>, then fix up <code>head</code>.” Great for reverse and merge — but uses O(n) stack.</p></div>
+        <div class="tip card"><div class="tip-ico">🧹</div><h3>Free memory in C++</h3>
+          <p>When deleting a node in C++, <code>delete</code> it after unlinking. Java and Python garbage-collect it for you.</p></div>
+        <div class="tip card"><div class="tip-ico">🗣️</div><h3>Say the invariant</h3>
+          <p>e.g. “everything before <code>curr</code> is already reversed and starts at <code>prev</code>”. Interviewers love it.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Losing the rest of the list by overwriting <code>next</code> before saving it.</li>
+            <li>Dereferencing <code>null</code> — not checking <code>curr</code> / <code>curr.next</code>.</li>
+            <li>Forgetting to return the <em>new</em> head after reversal or deleting the head.</li>
+            <li>Moving the <code>head</code> pointer itself while traversing (use a separate <code>cur</code>).</li>
+            <li>Forgetting to set the new tail’s <code>next = null</code> → accidental cycle.</li>
+            <li>Off-by-one when counting k steps for the k-th node from the end.</li>
+            <li>Comparing node <em>values</em> when you should compare node <em>identity</em> (intersection, cycle).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> build a list, traverse, insert/delete at head, tail and index.</li>
+            <li><strong>Day 2:</strong> reverse (iterative + recursive), remove elements, remove duplicates.</li>
+            <li><strong>Day 3:</strong> middle of list, cycle detection, cycle start.</li>
+            <li><strong>Day 4:</strong> merge two sorted lists, intersection of two lists.</li>
+            <li><strong>Day 5:</strong> remove n-th from end, palindrome list.</li>
+            <li><strong>Day 6:</strong> add two numbers, odd-even list, rotate list.</li>
+            <li><strong>Day 7:</strong> reorder list, reverse between m and n.</li>
+            <li><strong>Day 8:</strong> copy list with random pointer, sort list (merge sort).</li>
+            <li><strong>Day 9:</strong> LRU cache (doubly linked list + hash map).</li>
+            <li><strong>Day 10:</strong> reverse k-group, merge k sorted lists; redo your mistakes.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">06</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution. Solutions use LeetCode’s <code>ListNode</code> definition.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">07</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Draw the boxes, connect before you cut, and test with 0, 1 and 2 nodes.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
