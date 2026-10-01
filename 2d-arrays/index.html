@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>2D Arrays & Matrices</title>
+  <meta name="description" content="Learn 2D arrays and matrices: concepts, traversal patterns, an interactive visualizer, tips and tricks, and the most important interview questions with solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Matrix&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#traversals">Traversals</a>
+        <a href="#visualizer">Visualizer</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="python">Python</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures · Topic Guide</p>
+        <h1>2D Arrays &amp; Matrices</h1>
+        <p class="lead">A grid is just rows of arrays. Master a handful of indexing patterns and
+          most “matrix” interview problems collapse into the same few ideas. This page walks through the
+          concepts, lets you <em>watch</em> traversals happen, and finishes with the questions you should be able to solve.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-matrix" aria-hidden="true" id="heroMatrix"></div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>What is a 2D array?</h3>
+          <p>A 2D array is a table of values addressed by two indices: <code>a[row][col]</code>.
+            An <strong>R × C</strong> matrix has <strong>R</strong> rows (indices <code>0…R-1</code>) and
+            <strong>C</strong> columns (indices <code>0…C-1</code>).</p>
+          <ul class="checks">
+            <li>The <strong>first</strong> index picks the row (vertical position, “y”).</li>
+            <li>The <strong>second</strong> index picks the column (horizontal position, “x”).</li>
+            <li><code>a.length</code> / <code>len(a)</code> = number of rows; <code>a[0].length</code> = number of columns.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Indexing at a glance</h3>
+          <div class="index-demo" id="indexDemo"></div>
+          <p class="muted small" id="indexDemoText">Hover a cell to see its index.</p>
+        </div>
+      </div>
+
+      <h3 class="sub">Declaring &amp; initialising</h3>
+      <div class="code" data-code>
+<pre data-lang="cpp"><code>// Fixed size (stack)
+int a[3][4] = {{1,2,3,4},{5,6,7,8},{9,10,11,12}};
+
+// Dynamic size (preferred in interviews)
+int R = 3, C = 4;
+vector&lt;vector&lt;int&gt;&gt; grid(R, vector&lt;int&gt;(C, 0));
+
+int rows = grid.size();
+int cols = grid[0].size();</code></pre>
+<pre data-lang="java"><code>// Fixed values
+int[][] a = {{1,2,3,4},{5,6,7,8},{9,10,11,12}};
+
+// Dynamic size — all cells start at 0
+int R = 3, C = 4;
+int[][] grid = new int[R][C];
+
+int rows = grid.length;
+int cols = grid[0].length;</code></pre>
+<pre data-lang="python"><code># Fixed values
+a = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+
+# Dynamic size — use a comprehension!
+R, C = 3, 4
+grid = [[0] * C for _ in range(R)]
+
+# WRONG: every row is the SAME list object
+bad = [[0] * C] * R
+bad[0][0] = 9   # changes column 0 of every row!
+
+rows, cols = len(grid), len(grid[0])</code></pre>
+      </div>
+
+      <h3 class="sub">How it sits in memory</h3>
+      <div class="grid-2">
+        <div class="card">
+          <p>Memory is one long line, so a 2D array must be <em>flattened</em>. C, C++, Java, Python (NumPy default)
+            all use <strong>row-major</strong> order: row 0 first, then row 1, and so on.</p>
+          <div class="formula">index(i, j) = i × C + j</div>
+          <div class="formula">i = k / C, &nbsp; j = k % C</div>
+          <p class="muted small">This mapping lets you treat a matrix as a 1D sorted array — the trick behind binary search on a matrix.</p>
+        </div>
+        <div class="card">
+          <div class="flatten" id="flattenDemo"></div>
+          <p class="muted small">Row-major layout of a 3 × 4 matrix. Hover any cell to match it to its flat position.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Why row-major matters:</strong> looping <code>for i … for j …</code> walks memory sequentially and is
+        cache-friendly. Swapping the loops (column first) on a huge matrix can be several times slower in C/C++/Java.
+      </div>
+
+      <h3 class="sub">Jagged arrays</h3>
+      <p>In Java, Python and C++ (<code>vector&lt;vector&lt;int&gt;&gt;</code>), each row is its own array, so rows can have
+        <strong>different lengths</strong> (e.g. Pascal’s triangle). Always use <code>grid[i].length</code> for the inner loop
+        if rows may differ.</p>
+    </section>
+
+    <!-- TRAVERSALS -->
+    <section id="traversals" class="section">
+      <h2><span class="num">02</span> Core traversal patterns</h2>
+      <p class="lead small-lead">Almost every matrix problem is one of these patterns, or a combination of them.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Row by row &amp; column by column</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>for (int i = 0; i &lt; R; i++)        // row-major
+    for (int j = 0; j &lt; C; j++)
+        visit(a[i][j]);
+
+for (int j = 0; j &lt; C; j++)        // column-major
+    for (int i = 0; i &lt; R; i++)
+        visit(a[i][j]);</code></pre>
+<pre data-lang="java"><code>for (int i = 0; i &lt; R; i++)        // row-major
+    for (int j = 0; j &lt; C; j++)
+        visit(a[i][j]);
+
+for (int j = 0; j &lt; C; j++)        // column-major
+    for (int i = 0; i &lt; R; i++)
+        visit(a[i][j]);</code></pre>
+<pre data-lang="python"><code>for i in range(R):          # row-major
+    for j in range(C):
+        visit(a[i][j])
+
+for j in range(C):          # column-major
+    for i in range(R):
+        visit(a[i][j])</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Diagonals</h3>
+          <p>Cells on the same <strong>main diagonal</strong> share <code>i - j</code>. Cells on the same
+            <strong>anti-diagonal</strong> share <code>i + j</code>.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// square n x n
+for (int i = 0; i &lt; n; i++) {
+    primary   += a[i][i];
+    secondary += a[i][n - 1 - i];
+}</code></pre>
+<pre data-lang="java"><code>// square n x n
+for (int i = 0; i &lt; n; i++) {
+    primary   += a[i][i];
+    secondary += a[i][n - 1 - i];
+}</code></pre>
+<pre data-lang="python"><code># square n x n
+for i in range(n):
+    primary   += a[i][i]
+    secondary += a[i][n - 1 - i]</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Spiral (layer by layer)</h3>
+          <p>Keep four boundaries — <code>top, bottom, left, right</code> — and shrink one after every side you walk.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int top = 0, bottom = R - 1, left = 0, right = C - 1;
+while (top &lt;= bottom &amp;&amp; left &lt;= right) {
+    for (int j = left; j &lt;= right; j++) out.push_back(a[top][j]);
+    top++;
+    for (int i = top; i &lt;= bottom; i++) out.push_back(a[i][right]);
+    right--;
+    if (top &lt;= bottom) {
+        for (int j = right; j &gt;= left; j--) out.push_back(a[bottom][j]);
+        bottom--;
+    }
+    if (left &lt;= right) {
+        for (int i = bottom; i &gt;= top; i--) out.push_back(a[i][left]);
+        left++;
+    }
+}</code></pre>
+<pre data-lang="java"><code>int top = 0, bottom = R - 1, left = 0, right = C - 1;
+while (top &lt;= bottom &amp;&amp; left &lt;= right) {
+    for (int j = left; j &lt;= right; j++) out.add(a[top][j]);
+    top++;
+    for (int i = top; i &lt;= bottom; i++) out.add(a[i][right]);
+    right--;
+    if (top &lt;= bottom) {
+        for (int j = right; j &gt;= left; j--) out.add(a[bottom][j]);
+        bottom--;
+    }
+    if (left &lt;= right) {
+        for (int i = bottom; i &gt;= top; i--) out.add(a[i][left]);
+        left++;
+    }
+}</code></pre>
+<pre data-lang="python"><code>top, bottom, left, right = 0, R - 1, 0, C - 1
+while top &lt;= bottom and left &lt;= right:
+    for j in range(left, right + 1): out.append(a[top][j])
+    top += 1
+    for i in range(top, bottom + 1): out.append(a[i][right])
+    right -= 1
+    if top &lt;= bottom:
+        for j in range(right, left - 1, -1): out.append(a[bottom][j])
+        bottom -= 1
+    if left &lt;= right:
+        for i in range(bottom, top - 1, -1): out.append(a[i][left])
+        left += 1</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Neighbours with direction arrays</h3>
+          <p>Never write four copies of the same <code>if</code>. Loop over direction offsets and check bounds once.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int dr[] = {-1, 1, 0, 0};   // up, down, left, right
+int dc[] = { 0, 0,-1, 1};
+for (int d = 0; d &lt; 4; d++) {
+    int nr = r + dr[d], nc = c + dc[d];
+    if (nr &lt; 0 || nr &gt;= R || nc &lt; 0 || nc &gt;= C) continue;
+    // use grid[nr][nc]
+}</code></pre>
+<pre data-lang="java"><code>int[][] dirs = {{-1,0},{1,0},{0,-1},{0,1}};
+for (int[] d : dirs) {
+    int nr = r + d[0], nc = c + d[1];
+    if (nr &lt; 0 || nr &gt;= R || nc &lt; 0 || nc &gt;= C) continue;
+    // use grid[nr][nc]
+}</code></pre>
+<pre data-lang="python"><code>DIRS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+for dr, dc in DIRS:
+    nr, nc = r + dr, c + dc
+    if 0 &lt;= nr &lt; R and 0 &lt;= nc &lt; C:
+        ...  # use grid[nr][nc]</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Transpose &amp; rotate</h3>
+          <p><strong>Rotate 90° clockwise</strong> = transpose, then reverse each row.
+            <strong>Counter-clockwise</strong> = transpose, then reverse each column (or reverse rows first, then transpose).</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>// in-place transpose of n x n: only touch the upper triangle
+for (int i = 0; i &lt; n; i++)
+    for (int j = i + 1; j &lt; n; j++)
+        swap(a[i][j], a[j][i]);
+for (auto&amp; row : a) reverse(row.begin(), row.end());</code></pre>
+<pre data-lang="java"><code>// in-place transpose of n x n: only touch the upper triangle
+for (int i = 0; i &lt; n; i++)
+    for (int j = i + 1; j &lt; n; j++) {
+        int t = a[i][j]; a[i][j] = a[j][i]; a[j][i] = t;
+    }
+for (int[] row : a)
+    for (int l = 0, r = n - 1; l &lt; r; l++, r--) {
+        int t = row[l]; row[l] = row[r]; row[r] = t;
+    }</code></pre>
+<pre data-lang="python"><code># in-place transpose of n x n: only touch the upper triangle
+for i in range(n):
+    for j in range(i + 1, n):
+        a[i][j], a[j][i] = a[j][i], a[i][j]
+for row in a:
+    row.reverse()
+
+# one-liner (new matrix): list(zip(*a[::-1]))</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>2D prefix sums</h3>
+          <p>Precompute once in <code>O(R·C)</code>, then answer any rectangle sum in <code>O(1)</code>.</p>
+          <div class="formula">P[i+1][j+1] = a[i][j] + P[i][j+1] + P[i+1][j] − P[i][j]</div>
+          <div class="formula">sum(r1,c1 → r2,c2) = P[r2+1][c2+1] − P[r1][c2+1] − P[r2+1][c1] + P[r1][c1]</div>
+          <p class="muted small">The extra row/column of zeros (size <code>(R+1)×(C+1)</code>) removes all edge-case <code>if</code>s.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZER -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">03</span> Interactive visualizer</h2>
+      <p class="lead small-lead">Pick a pattern and watch the order in which cells are visited. Numbers show the visit order.</p>
+
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Rows <input type="number" id="vizRows" min="1" max="8" value="4"></label>
+          <label>Cols <input type="number" id="vizCols" min="1" max="8" value="5"></label>
+          <label>Speed
+            <select id="vizSpeed">
+              <option value="500">Slow</option>
+              <option value="250" selected>Normal</option>
+              <option value="90">Fast</option>
+            </select>
+          </label>
+        </div>
+        <div class="viz-buttons" id="vizButtons">
+          <button data-pattern="row">Row-major</button>
+          <button data-pattern="col">Column-major</button>
+          <button data-pattern="snake">Snake / zig-zag</button>
+          <button data-pattern="spiral">Spiral</button>
+          <button data-pattern="diag">Diagonal traverse</button>
+          <button data-pattern="anti">Anti-diagonals (i+j)</button>
+          <button data-pattern="main">Main diagonal</button>
+          <button data-pattern="border">Boundary</button>
+          <span class="divider"></span>
+          <button data-op="transpose" class="op">Transpose</button>
+          <button data-op="rotate" class="op">Rotate 90°</button>
+          <button data-op="reset" class="op ghost">Reset</button>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-grid" id="vizGrid"></div>
+          <div class="viz-side">
+            <div class="viz-out-label">Output order</div>
+            <div class="viz-out" id="vizOut">—</div>
+            <p class="muted small" id="vizNote">Choose a pattern to start.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">04</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">✍️</div><h3>Draw before you code</h3>
+          <p>Sketch a 3×4 example and write the indices <code>(i,j)</code> in each box. Most bugs are visible on paper in 30 seconds.</p></div>
+        <div class="tip card"><div class="tip-ico">🧭</div><h3>Say “row, then column”</h3>
+          <p><code>a[i][j]</code> is <code>a[y][x]</code>, not <code>a[x][y]</code>. Name variables <code>r, c</code> instead of <code>i, j</code> when it helps.</p></div>
+        <div class="tip card"><div class="tip-ico">🧱</div><h3>Test non-square matrices</h3>
+          <p>Square inputs hide bugs where <code>R</code> and <code>C</code> are swapped. Always try a 2×3 and a 1×N.</p></div>
+        <div class="tip card"><div class="tip-ico">🛡️</div><h3>One bounds-check helper</h3>
+          <p>Write <code>inside(r,c)</code> once: <code>0 ≤ r &lt; R &amp;&amp; 0 ≤ c &lt; C</code>. Check bounds <em>before</em> reading the cell.</p></div>
+        <div class="tip card"><div class="tip-ico">🧮</div><h3>Diagonal keys</h3>
+          <p><code>i − j</code> is constant on a main diagonal, <code>i + j</code> on an anti-diagonal. Great as hash-map keys (N-Queens, Toeplitz).</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Rotation recipe</h3>
+          <p>Clockwise = transpose + reverse rows. Remember one, derive the rest. 180° = reverse rows + reverse each row.</p></div>
+        <div class="tip card"><div class="tip-ico">📏</div><h3>Flatten when sorted</h3>
+          <p>If rows are sorted and each row starts after the previous ends, treat it as a 1D array of length <code>R·C</code> using <code>k / C</code>, <code>k % C</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">🪜</div><h3>Staircase search</h3>
+          <p>Rows <em>and</em> columns sorted? Start top-right: too big → move left, too small → move down. <code>O(R + C)</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">🏷️</div><h3>In-place markers</h3>
+          <p>Need O(1) extra space? Store state in the matrix itself — first row/col as flags, or encode old+new state in bits (Game of Life).</p></div>
+        <div class="tip card"><div class="tip-ico">🌊</div><h3>Grid = graph</h3>
+          <p>Each cell is a node, neighbours are edges. Islands, flood fill, shortest path → DFS / BFS. Mark visited to avoid loops.</p></div>
+        <div class="tip card"><div class="tip-ico">⚡</div><h3>Prefix sums for ranges</h3>
+          <p>Any “sum of a sub-rectangle” query repeated many times → 2D prefix sum. Pad with an extra zero row and column.</p></div>
+        <div class="tip card"><div class="tip-ico">🐍</div><h3>Python pitfall</h3>
+          <p><code>[[0]*C]*R</code> copies the <em>same</em> row R times. Always use <code>[[0]*C for _ in range(R)]</code>.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Using <code>grid.length</code> for the column count.</li>
+            <li>Not handling an empty matrix (<code>R == 0</code> or <code>C == 0</code>).</li>
+            <li>Modifying the matrix while reading it (use a copy or encode states).</li>
+            <li>Transposing the full matrix in place (swaps everything twice → no change).</li>
+            <li>Spiral: forgetting the <code>top ≤ bottom</code> / <code>left ≤ right</code> re-check for single rows/cols.</li>
+            <li>Integer overflow in prefix sums or matrix multiplication — use <code>long</code>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 2-week practice plan</h3>
+          <ol class="plan">
+            <li><strong>Days 1–2:</strong> declare, print, sum rows/cols, transpose, diagonal sums.</li>
+            <li><strong>Days 3–4:</strong> spiral, snake, diagonal traverse — implement from memory.</li>
+            <li><strong>Days 5–6:</strong> rotate image, set matrix zeroes, matrix multiplication.</li>
+            <li><strong>Days 7–8:</strong> searching: binary search on matrix, staircase, k-th smallest.</li>
+            <li><strong>Days 9–10:</strong> grids as graphs: flood fill, islands, rotting oranges.</li>
+            <li><strong>Days 11–12:</strong> prefix sums &amp; DP: range sum, unique paths, maximal square.</li>
+            <li><strong>Days 13–14:</strong> redo the hard ones without notes; time yourself.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">05</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">06</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Practise daily, draw your grids, and test non-square inputs.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
