@@ -21,6 +21,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Sorting](sorting/index.html) — stability, in-place, the O(n log n) lower bound, bubble/selection/
   insertion/merge/quick/heap/counting sort, built-in sorts and comparators, an animated bar-chart
   visualizer with an operation-count comparison, a stability demo, tips & tricks, 20 important questions and a quiz.
+- [Trees](trees/index.html) — terminology, binary tree types, pre/in/post/level-order traversals,
+  binary search trees (search, insert, delete), recursion patterns, a traversal animator and a BST
+  playground, tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.

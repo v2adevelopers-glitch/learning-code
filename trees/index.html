@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trees Guide</title>
+  <meta name="description" content="Learn trees properly: terminology, binary trees, DFS and BFS traversals, binary search trees, recursion patterns, interactive traversal and BST visualizers, tips, and the most important interview questions with C++, Java and JavaScript solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Trees&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#traversals">Traversals</a>
+        <a href="#bst">BST</a>
+        <a href="#visualizer">Visualizers</a>
+        <a href="#patterns">Patterns</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="js">JavaScript</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures · Topic Guide</p>
+        <h1>Trees</h1>
+        <p class="lead">File systems, the HTML DOM, databases, compilers and decision engines are all trees. In interviews,
+          tree questions test one skill above all: <strong>recursion</strong>. Learn to think “what does my subtree need to
+          tell me?” and most problems shrink to a few lines.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-tree" aria-hidden="true">
+        <svg class="tree-svg" id="heroTree"></svg>
+        <p class="hero-bs-cap" id="heroCap">level-order traversal</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Vocabulary</h3>
+          <ul class="checks">
+            <li><strong>Root:</strong> the top node (no parent). <strong>Leaf:</strong> a node with no children.</li>
+            <li><strong>Parent / child / sibling</strong> — just like a family tree.</li>
+            <li><strong>Depth</strong> of a node: edges from the root to it. <strong>Height</strong> of a tree: the longest root-to-leaf path.</li>
+            <li><strong>Subtree:</strong> a node plus all its descendants — itself a tree. That’s why recursion fits so well.</li>
+            <li>A tree with n nodes has exactly <strong>n − 1 edges</strong> and no cycles.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Kinds of binary trees</h3>
+          <ul class="checks">
+            <li><strong>Binary tree:</strong> every node has at most two children, <code>left</code> and <code>right</code>.</li>
+            <li><strong>Full:</strong> every node has 0 or 2 children.</li>
+            <li><strong>Complete:</strong> all levels full except possibly the last, filled left to right (heaps!).</li>
+            <li><strong>Perfect:</strong> all leaves on the same level — 2<sup>h+1</sup> − 1 nodes.</li>
+            <li><strong>Balanced:</strong> left and right subtree heights differ by ≤ 1 everywhere → height O(log n).</li>
+            <li><strong>BST:</strong> left subtree &lt; node &lt; right subtree, for every node.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="sub">The node</h3>
+      <div class="code" data-code>
+<pre data-lang="cpp"><code>struct TreeNode {
+    int val;
+    TreeNode *left, *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+//        1
+//       / \
+//      2   3
+TreeNode* root = new TreeNode(1);
+root-&gt;left = new TreeNode(2);
+root-&gt;right = new TreeNode(3);</code></pre>
+<pre data-lang="java"><code>class TreeNode {
+    int val;
+    TreeNode left, right;
+    TreeNode(int x) { val = x; }
+}
+
+//        1
+//       / \
+//      2   3
+TreeNode root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);</code></pre>
+<pre data-lang="js"><code>class TreeNode {
+    constructor(val = 0, left = null, right = null) {
+        this.val = val;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+//        1
+//       / \
+//      2   3
+const root = new TreeNode(1, new TreeNode(2), new TreeNode(3));</code></pre>
+      </div>
+    </section>
+
+    <!-- TRAVERSALS -->
+    <section id="traversals" class="section">
+      <h2><span class="num">02</span> Traversals</h2>
+      <p class="lead small-lead">Depth-first (pre/in/post-order) uses recursion or a stack. Breadth-first (level order) uses a queue.
+        The only difference between the three DFS orders is <strong>when</strong> you visit the node.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Pre / in / post-order (recursive)</h3>
+          <p><strong>Pre:</strong> node, left, right (copy a tree). <strong>In:</strong> left, node, right (BST → sorted).
+            <strong>Post:</strong> left, right, node (delete a tree, compute heights).</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void preorder(TreeNode* n, vector&lt;int&gt;&amp; out) {
+    if (!n) return;
+    out.push_back(n-&gt;val);           // visit BEFORE children
+    preorder(n-&gt;left, out);
+    preorder(n-&gt;right, out);
+}
+void inorder(TreeNode* n, vector&lt;int&gt;&amp; out) {
+    if (!n) return;
+    inorder(n-&gt;left, out);
+    out.push_back(n-&gt;val);           // visit BETWEEN children
+    inorder(n-&gt;right, out);
+}
+void postorder(TreeNode* n, vector&lt;int&gt;&amp; out) {
+    if (!n) return;
+    postorder(n-&gt;left, out);
+    postorder(n-&gt;right, out);
+    out.push_back(n-&gt;val);           // visit AFTER children
+}</code></pre>
+<pre data-lang="java"><code>void preorder(TreeNode n, List&lt;Integer&gt; out) {
+    if (n == null) return;
+    out.add(n.val);                  // visit BEFORE children
+    preorder(n.left, out);
+    preorder(n.right, out);
+}
+void inorder(TreeNode n, List&lt;Integer&gt; out) {
+    if (n == null) return;
+    inorder(n.left, out);
+    out.add(n.val);                  // visit BETWEEN children
+    inorder(n.right, out);
+}
+void postorder(TreeNode n, List&lt;Integer&gt; out) {
+    if (n == null) return;
+    postorder(n.left, out);
+    postorder(n.right, out);
+    out.add(n.val);                  // visit AFTER children
+}</code></pre>
+<pre data-lang="js"><code>function preorder(n, out = []) {
+    if (!n) return out;
+    out.push(n.val);                 // visit BEFORE children
+    preorder(n.left, out);
+    preorder(n.right, out);
+    return out;
+}
+function inorder(n, out = []) {
+    if (!n) return out;
+    inorder(n.left, out);
+    out.push(n.val);                 // visit BETWEEN children
+    inorder(n.right, out);
+    return out;
+}
+function postorder(n, out = []) {
+    if (!n) return out;
+    postorder(n.left, out);
+    postorder(n.right, out);
+    out.push(n.val);                 // visit AFTER children
+    return out;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Inorder with an explicit stack</h3>
+          <p>Go left as far as possible pushing nodes; pop, visit, then move to the right child. Interviewers often ask for the iterative version.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;int&gt; inorderIter(TreeNode* root) {
+    vector&lt;int&gt; out;
+    stack&lt;TreeNode*&gt; st;
+    TreeNode* cur = root;
+    while (cur || !st.empty()) {
+        while (cur) { st.push(cur); cur = cur-&gt;left; }   // dive left
+        cur = st.top(); st.pop();
+        out.push_back(cur-&gt;val);                         // visit
+        cur = cur-&gt;right;                                // then right subtree
+    }
+    return out;
+}</code></pre>
+<pre data-lang="java"><code>List&lt;Integer&gt; inorderIter(TreeNode root) {
+    List&lt;Integer&gt; out = new ArrayList&lt;&gt;();
+    Deque&lt;TreeNode&gt; st = new ArrayDeque&lt;&gt;();
+    TreeNode cur = root;
+    while (cur != null || !st.isEmpty()) {
+        while (cur != null) { st.push(cur); cur = cur.left; }   // dive left
+        cur = st.pop();
+        out.add(cur.val);                                       // visit
+        cur = cur.right;                                        // then right subtree
+    }
+    return out;
+}</code></pre>
+<pre data-lang="js"><code>function inorderIter(root) {
+    const out = [], st = [];
+    let cur = root;
+    while (cur || st.length) {
+        while (cur) { st.push(cur); cur = cur.left; }    // dive left
+        cur = st.pop();
+        out.push(cur.val);                               // visit
+        cur = cur.right;                                 // then right subtree
+    }
+    return out;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Level order (BFS)</h3>
+          <p>Process the tree one level at a time with a queue. Snapshot the queue size to know where each level ends.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;vector&lt;int&gt;&gt; levelOrder(TreeNode* root) {
+    vector&lt;vector&lt;int&gt;&gt; res;
+    if (!root) return res;
+    queue&lt;TreeNode*&gt; q;
+    q.push(root);
+    while (!q.empty()) {
+        vector&lt;int&gt; level;
+        for (int sz = q.size(); sz &gt; 0; sz--) {
+            TreeNode* n = q.front(); q.pop();
+            level.push_back(n-&gt;val);
+            if (n-&gt;left) q.push(n-&gt;left);
+            if (n-&gt;right) q.push(n-&gt;right);
+        }
+        res.push_back(level);
+    }
+    return res;
+}</code></pre>
+<pre data-lang="java"><code>List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
+    if (root == null) return res;
+    Queue&lt;TreeNode&gt; q = new ArrayDeque&lt;&gt;();
+    q.offer(root);
+    while (!q.isEmpty()) {
+        List&lt;Integer&gt; level = new ArrayList&lt;&gt;();
+        for (int sz = q.size(); sz &gt; 0; sz--) {
+            TreeNode n = q.poll();
+            level.add(n.val);
+            if (n.left != null) q.offer(n.left);
+            if (n.right != null) q.offer(n.right);
+        }
+        res.add(level);
+    }
+    return res;
+}</code></pre>
+<pre data-lang="js"><code>function levelOrder(root) {
+    const res = [];
+    let level = root ? [root] : [];
+    while (level.length) {                    // one array per level: no shift()
+        res.push(level.map(n =&gt; n.val));
+        const next = [];
+        for (const n of level) {
+            if (n.left) next.push(n.left);
+            if (n.right) next.push(n.right);
+        }
+        level = next;
+    }
+    return res;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Height — the “return info up” template</h3>
+          <p>Ask each child for its answer, combine, return. This shape solves height, diameter, balanced check, max path sum…</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int height(TreeNode* n) {
+    if (!n) return 0;                              // empty tree
+    int l = height(n-&gt;left);                        // ask the children
+    int r = height(n-&gt;right);
+    return 1 + max(l, r);                          // combine
+}</code></pre>
+<pre data-lang="java"><code>int height(TreeNode n) {
+    if (n == null) return 0;                       // empty tree
+    int l = height(n.left);                        // ask the children
+    int r = height(n.right);
+    return 1 + Math.max(l, r);                     // combine
+}</code></pre>
+<pre data-lang="js"><code>function height(n) {
+    if (!n) return 0;                              // empty tree
+    const l = height(n.left);                      // ask the children
+    const r = height(n.right);
+    return 1 + Math.max(l, r);                     // combine
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- BST -->
+    <section id="bst" class="section">
+      <h2><span class="num">03</span> Binary search trees</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>The BST property</h3>
+          <p>For <em>every</em> node: everything in its left subtree is smaller, everything in its right subtree is larger.
+            So search, insert and delete each follow <strong>one path</strong> from the root — O(height).</p>
+          <ul class="checks">
+            <li>Inorder traversal of a BST gives the values <strong>sorted</strong>.</li>
+            <li>Minimum = leftmost node, maximum = rightmost node.</li>
+            <li>Balanced (AVL, red-black: C++ <code>std::map</code>, Java <code>TreeMap</code>) → height O(log n).</li>
+          </ul>
+        </div>
+        <div class="card table-card">
+          <table class="cmp-table">
+            <thead><tr><th>Operation</th><th>Balanced BST</th><th>Skewed BST</th></tr></thead>
+            <tbody>
+              <tr><td>Search</td><td class="good">O(log n)</td><td class="bad">O(n)</td></tr>
+              <tr><td>Insert</td><td class="good">O(log n)</td><td class="bad">O(n)</td></tr>
+              <tr><td>Delete</td><td class="good">O(log n)</td><td class="bad">O(n)</td></tr>
+              <tr><td>Min / max</td><td class="good">O(log n)</td><td class="bad">O(n)</td></tr>
+              <tr><td>Sorted output</td><td>O(n)</td><td>O(n)</td></tr>
+            </tbody>
+          </table>
+          <p class="muted small" style="padding:0 10px">Inserting already-sorted values into a plain BST creates a “linked list” — try it in the playground below.</p>
+        </div>
+      </div>
+
+      <div class="pattern-list mt">
+        <article class="card pattern">
+          <h3>Search &amp; insert</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>TreeNode* search(TreeNode* n, int x) {
+    while (n &amp;&amp; n-&gt;val != x)
+        n = x &lt; n-&gt;val ? n-&gt;left : n-&gt;right;     // go one way only
+    return n;
+}
+TreeNode* insert(TreeNode* n, int x) {
+    if (!n) return new TreeNode(x);              // found the empty spot
+    if (x &lt; n-&gt;val) n-&gt;left = insert(n-&gt;left, x);
+    else if (x &gt; n-&gt;val) n-&gt;right = insert(n-&gt;right, x);
+    return n;                                    // duplicates ignored
+}</code></pre>
+<pre data-lang="java"><code>TreeNode search(TreeNode n, int x) {
+    while (n != null &amp;&amp; n.val != x)
+        n = x &lt; n.val ? n.left : n.right;        // go one way only
+    return n;
+}
+TreeNode insert(TreeNode n, int x) {
+    if (n == null) return new TreeNode(x);       // found the empty spot
+    if (x &lt; n.val) n.left = insert(n.left, x);
+    else if (x &gt; n.val) n.right = insert(n.right, x);
+    return n;                                    // duplicates ignored
+}</code></pre>
+<pre data-lang="js"><code>function search(n, x) {
+    while (n &amp;&amp; n.val !== x)
+        n = x &lt; n.val ? n.left : n.right;        // go one way only
+    return n;
+}
+function insert(n, x) {
+    if (!n) return new TreeNode(x);              // found the empty spot
+    if (x &lt; n.val) n.left = insert(n.left, x);
+    else if (x &gt; n.val) n.right = insert(n.right, x);
+    return n;                                    // duplicates ignored
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Delete — three cases</h3>
+          <p><strong>Leaf:</strong> just remove it. <strong>One child:</strong> replace the node with that child.
+            <strong>Two children:</strong> copy in the <em>inorder successor</em> (smallest value of the right subtree), then delete that successor.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>TreeNode* remove(TreeNode* n, int x) {
+    if (!n) return nullptr;
+    if (x &lt; n-&gt;val) n-&gt;left = remove(n-&gt;left, x);
+    else if (x &gt; n-&gt;val) n-&gt;right = remove(n-&gt;right, x);
+    else {
+        if (!n-&gt;left) return n-&gt;right;           // 0 or 1 child
+        if (!n-&gt;right) return n-&gt;left;
+        TreeNode* s = n-&gt;right;                  // 2 children:
+        while (s-&gt;left) s = s-&gt;left;             //   inorder successor
+        n-&gt;val = s-&gt;val;
+        n-&gt;right = remove(n-&gt;right, s-&gt;val);
+    }
+    return n;
+}</code></pre>
+<pre data-lang="java"><code>TreeNode remove(TreeNode n, int x) {
+    if (n == null) return null;
+    if (x &lt; n.val) n.left = remove(n.left, x);
+    else if (x &gt; n.val) n.right = remove(n.right, x);
+    else {
+        if (n.left == null) return n.right;      // 0 or 1 child
+        if (n.right == null) return n.left;
+        TreeNode s = n.right;                    // 2 children:
+        while (s.left != null) s = s.left;       //   inorder successor
+        n.val = s.val;
+        n.right = remove(n.right, s.val);
+    }
+    return n;
+}</code></pre>
+<pre data-lang="js"><code>function remove(n, x) {
+    if (!n) return null;
+    if (x &lt; n.val) n.left = remove(n.left, x);
+    else if (x &gt; n.val) n.right = remove(n.right, x);
+    else {
+        if (!n.left) return n.right;             // 0 or 1 child
+        if (!n.right) return n.left;
+        let s = n.right;                         // 2 children:
+        while (s.left) s = s.left;               //   inorder successor
+        n.val = s.val;
+        n.right = remove(n.right, s.val);
+    }
+    return n;
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZERS -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">04</span> Interactive visualizers</h2>
+
+      <h3 class="sub">A · Traversal orders</h3>
+      <div class="viz card">
+        <div class="viz-buttons" id="travButtons">
+          <button data-trav="pre" class="active">Preorder</button>
+          <button data-trav="in">Inorder</button>
+          <button data-trav="post">Postorder</button>
+          <button data-trav="level">Level order</button>
+          <span class="divider"></span>
+          <button id="travRandom" class="op">Random tree</button>
+          <label class="inline-ctl">Speed
+            <select id="travSpeed">
+              <option value="1000">Slow</option>
+              <option value="600" selected>Normal</option>
+              <option value="250">Fast</option>
+            </select>
+          </label>
+        </div>
+        <svg class="tree-svg big" id="travSvg"></svg>
+        <div class="bs-status" id="travStatus">Pick a traversal. Numbers on the nodes show the visit order.</div>
+      </div>
+
+      <h3 class="sub">B · BST playground</h3>
+      <div class="viz card">
+        <div class="viz-controls">
+          <label>Value <input type="number" id="bstVal" value="45"></label>
+        </div>
+        <div class="viz-buttons">
+          <button data-bst="insert" class="active">Insert</button>
+          <button data-bst="search">Search</button>
+          <button data-bst="delete">Delete</button>
+          <span class="divider"></span>
+          <button class="op" id="bstRandom">Random BST</button>
+          <button class="op" id="bstSorted">Insert 1…7 in order</button>
+          <button class="op" id="bstClear">Clear</button>
+        </div>
+        <svg class="tree-svg big" id="bstSvg"></svg>
+        <div class="bst-info"><span>height <b id="bstH">0</b></span><span>nodes <b id="bstN">0</b></span><span>inorder <b id="bstIn">—</b></span></div>
+        <div class="bs-status" id="bstStatus">Insert, search or delete a value and watch the path it takes.</div>
+      </div>
+    </section>
+
+    <!-- PATTERNS -->
+    <section id="patterns" class="section">
+      <h2><span class="num">05</span> The recursion patterns</h2>
+      <p class="lead small-lead">Before coding, decide which way information flows.</p>
+
+      <div class="tips three">
+        <div class="tip card"><div class="tip-ico">⬆️</div><h3>Return info up</h3>
+          <p>Children report a value, the parent combines it (post-order). Height, size, diameter, balanced, max path sum, LCA.</p></div>
+        <div class="tip card"><div class="tip-ico">⬇️</div><h3>Pass info down</h3>
+          <p>Carry state from the root as parameters (pre-order). Path sum, valid BST bounds, max on the path (“good nodes”), depth.</p></div>
+        <div class="tip card"><div class="tip-ico">↔️</div><h3>Both at once</h3>
+          <p>Return one thing while updating a global answer: diameter returns height but records left + right at every node.</p></div>
+        <div class="tip card"><div class="tip-ico">🌊</div><h3>Level by level</h3>
+          <p>Right side view, zigzag, averages, minimum depth: BFS with the queue-size trick.</p></div>
+        <div class="tip card"><div class="tip-ico">📏</div><h3>Use the BST order</h3>
+          <p>Kth smallest, validate, LCA in a BST, range sum: go left or right instead of searching both sides — or use inorder = sorted.</p></div>
+        <div class="tip card"><div class="tip-ico">🏗️</div><h3>Build from traversals</h3>
+          <p>Preorder gives the root; inorder splits left from right. Serialize with preorder + null markers.</p></div>
+      </div>
+
+      <div class="pattern-list mt">
+        <article class="card pattern">
+          <h3>Pass info down — validate a BST with bounds</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>bool valid(TreeNode* n, long long lo, long long hi) {
+    if (!n) return true;
+    if (n-&gt;val &lt;= lo || n-&gt;val &gt;= hi) return false;
+    return valid(n-&gt;left, lo, n-&gt;val) &amp;&amp;      // left: tighten the upper bound
+           valid(n-&gt;right, n-&gt;val, hi);       // right: tighten the lower bound
+}
+// valid(root, LLONG_MIN, LLONG_MAX)</code></pre>
+<pre data-lang="java"><code>boolean valid(TreeNode n, long lo, long hi) {
+    if (n == null) return true;
+    if (n.val &lt;= lo || n.val &gt;= hi) return false;
+    return valid(n.left, lo, n.val) &amp;&amp;        // left: tighten the upper bound
+           valid(n.right, n.val, hi);         // right: tighten the lower bound
+}
+// valid(root, Long.MIN_VALUE, Long.MAX_VALUE)</code></pre>
+<pre data-lang="js"><code>function valid(n, lo = -Infinity, hi = Infinity) {
+    if (!n) return true;
+    if (n.val &lt;= lo || n.val &gt;= hi) return false;
+    return valid(n.left, lo, n.val) &amp;&amp;        // left: tighten the upper bound
+           valid(n.right, n.val, hi);         // right: tighten the lower bound
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Both at once — diameter</h3>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>int best = 0;
+int depth(TreeNode* n) {                 // returns height...
+    if (!n) return 0;
+    int l = depth(n-&gt;left), r = depth(n-&gt;right);
+    best = max(best, l + r);             // ...while recording the answer
+    return 1 + max(l, r);
+}</code></pre>
+<pre data-lang="java"><code>int best = 0;
+int depth(TreeNode n) {                  // returns height...
+    if (n == null) return 0;
+    int l = depth(n.left), r = depth(n.right);
+    best = Math.max(best, l + r);        // ...while recording the answer
+    return 1 + Math.max(l, r);
+}</code></pre>
+<pre data-lang="js"><code>let best = 0;
+function depth(n) {                      // returns height...
+    if (!n) return 0;
+    const l = depth(n.left), r = depth(n.right);
+    best = Math.max(best, l + r);        // ...while recording the answer
+    return 1 + Math.max(l, r);
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">06</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🙈</div><h3>Trust the recursion</h3>
+          <p>Assume the call on a child returns the right answer for that subtree. Only think about combining at the current node.</p></div>
+        <div class="tip card"><div class="tip-ico">🪹</div><h3>Base case first</h3>
+          <p>Start every function with “if node is null, return …”. Choosing that value (0, true, −∞, null) is half the solution.</p></div>
+        <div class="tip card"><div class="tip-ico">✏️</div><h3>Draw 3–7 nodes</h3>
+          <p>Sketch a small tree, including a lopsided one, and trace your function by hand before running it.</p></div>
+        <div class="tip card"><div class="tip-ico">🔤</div><h3>Remember the orders</h3>
+          <p>The name says where the node goes: <strong>pre</strong> = first, <strong>in</strong> = in the middle, <strong>post</strong> = last.</p></div>
+        <div class="tip card"><div class="tip-ico">📈</div><h3>BST + inorder = sorted</h3>
+          <p>Whenever a BST problem mentions order, k-th, or “closest”, think inorder traversal.</p></div>
+        <div class="tip card"><div class="tip-ico">⚠️</div><h3>Validate with bounds</h3>
+          <p>Checking only <code>left &lt; node &lt; right</code> locally is wrong — a deep node can violate an ancestor. Pass (lo, hi) down.</p></div>
+        <div class="tip card"><div class="tip-ico">🌳</div><h3>Height can be n</h3>
+          <p>Recursion depth equals tree height. A skewed tree of 10⁵ nodes can overflow the stack — mention iterative BFS/DFS.</p></div>
+        <div class="tip card"><div class="tip-ico">🌐</div><h3>Global vs returned values</h3>
+          <p>If the answer isn’t what the parent needs (diameter, max path sum), return one thing and update a global/field for the answer.</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Same tree, two trees</h3>
+          <p>Symmetric, same tree, subtree: recurse on <em>pairs</em> of nodes <code>f(a, b)</code>.</p></div>
+        <div class="tip card"><div class="tip-ico">🧮</div><h3>Count carefully</h3>
+          <p>Height in nodes vs edges, depth from 0 or 1 — state your convention out loud.</p></div>
+        <div class="tip card"><div class="tip-ico">🧭</div><h3>BFS for “nearest”</h3>
+          <p>Minimum depth, closest leaf, right side view: BFS finds them level by level and can stop early.</p></div>
+        <div class="tip card"><div class="tip-ico">📦</div><h3>Return pairs</h3>
+          <p>Need two facts from a child (height and balanced? robbed/not robbed?) — return a pair or array.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>Forgetting the null base case → null-pointer errors.</li>
+            <li>Validating a BST by comparing only parent and children.</li>
+            <li>Using <code>int</code> bounds (<code>INT_MIN</code>) when node values can equal them.</li>
+            <li>Mixing up height measured in nodes vs edges.</li>
+            <li>Recomputing heights at every node → O(n²) (balanced tree check).</li>
+            <li>In BFS, not snapshotting the queue size → levels mix together.</li>
+            <li>Comparing node values instead of node identity in LCA.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> all four traversals (recursive + iterative inorder).</li>
+            <li><strong>Day 2:</strong> max depth, invert, same tree, symmetric tree.</li>
+            <li><strong>Day 3:</strong> path sum, balanced tree, diameter.</li>
+            <li><strong>Day 4:</strong> level order, zigzag, right side view.</li>
+            <li><strong>Day 5:</strong> BST search/insert/delete; validate BST.</li>
+            <li><strong>Day 6:</strong> kth smallest, LCA in a BST.</li>
+            <li><strong>Day 7:</strong> LCA in a binary tree, count good nodes.</li>
+            <li><strong>Day 8:</strong> construct from preorder + inorder.</li>
+            <li><strong>Day 9:</strong> max path sum, binary tree cameras.</li>
+            <li><strong>Day 10:</strong> serialize/deserialize; redo mistakes.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">07</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution. Solutions use LeetCode’s <code>TreeNode</code>.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">08</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Base case first, trust the recursion, and decide which way information flows.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
