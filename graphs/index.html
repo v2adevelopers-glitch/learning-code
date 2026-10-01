@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graphs Guide</title>
+  <meta name="description" content="Learn graphs properly: terminology, representations, BFS and DFS, topological sort, Dijkstra, union-find, choosing the right algorithm, interactive BFS/DFS/Dijkstra and topological-sort visualizers, tips, and the most important interview questions with C++, Java and JavaScript solutions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        Graphs&nbsp;Lab
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#basics">Basics</a>
+        <a href="#representation">Representation</a>
+        <a href="#traversals">BFS &amp; DFS</a>
+        <a href="#algorithms">Algorithms</a>
+        <a href="#visualizer">Visualizers</a>
+        <a href="#choose">Which one?</a>
+        <a href="#tips">Tips</a>
+        <a href="#questions">Questions</a>
+        <a href="#quiz">Quiz</a>
+        <a href="../index.html">All topics</a>
+      </nav>
+      <div class="controls">
+        <div class="lang-switch" role="group" aria-label="Code language">
+          <button data-lang="cpp" class="active">C++</button>
+          <button data-lang="java">Java</button>
+          <button data-lang="js">JavaScript</button>
+        </div>
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">◐</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">Data Structures · Topic Guide</p>
+        <h1>Graphs</h1>
+        <p class="lead">Maps, social networks, the web, course prerequisites, package dependencies, mazes — all graphs.
+          Trees, grids and linked lists are graphs too. Master <strong>BFS</strong>, <strong>DFS</strong> and a handful of classic
+          algorithms, learn to <em>recognise</em> the graph hidden in a problem, and you can solve a huge family of questions.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#basics">Start learning</a>
+          <a class="btn" href="#questions">Jump to questions</a>
+        </div>
+      </div>
+      <div class="hero-graph" aria-hidden="true">
+        <svg class="graph-svg" id="heroGraph" viewBox="0 0 640 320"></svg>
+        <p class="hero-bs-cap" id="heroCap">breadth-first search from A</p>
+      </div>
+    </section>
+
+    <!-- BASICS -->
+    <section id="basics" class="section">
+      <h2><span class="num">01</span> The basics</h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Vocabulary</h3>
+          <ul class="checks">
+            <li><strong>Vertex (node)</strong> and <strong>edge</strong> (a connection between two vertices). <code>V</code> = number of vertices, <code>E</code> = edges.</li>
+            <li><strong>Directed</strong> (one-way, A → B) vs <strong>undirected</strong> (two-way, A — B).</li>
+            <li><strong>Weighted:</strong> each edge has a cost, distance or capacity.</li>
+            <li><strong>Degree:</strong> number of edges at a vertex (in-degree / out-degree when directed).</li>
+            <li><strong>Path</strong>, <strong>cycle</strong> (a path back to its start), <strong>connected component</strong> (a maximal group of mutually reachable vertices).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Special graphs you’ll meet</h3>
+          <ul class="checks">
+            <li><strong>Tree:</strong> connected, undirected, no cycles — exactly V − 1 edges.</li>
+            <li><strong>DAG:</strong> directed acyclic graph — tasks with prerequisites; has a topological order.</li>
+            <li><strong>Grid:</strong> each cell is a vertex, neighbours are edges (islands, mazes, flood fill).</li>
+            <li><strong>Bipartite:</strong> vertices split into two groups with edges only between groups (2-colourable).</li>
+            <li><strong>Implicit graph:</strong> vertices are states (words, lock combinations, board positions) generated on the fly.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPRESENTATION -->
+    <section id="representation" class="section">
+      <h2><span class="num">02</span> Representing a graph</h2>
+
+      <div class="card table-card">
+        <table class="cmp-table">
+          <thead><tr><th>Representation</th><th>Space</th><th>Is there an edge u–v?</th><th>List neighbours of u</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Adjacency list</strong></td><td class="good">O(V + E)</td><td>O(deg u)</td><td class="good">O(deg u)</td><td>Almost everything (sparse graphs)</td></tr>
+            <tr><td><strong>Adjacency matrix</strong></td><td class="bad">O(V²)</td><td class="good">O(1)</td><td class="bad">O(V)</td><td>Dense graphs, Floyd–Warshall</td></tr>
+            <tr><td><strong>Edge list</strong></td><td class="good">O(E)</td><td class="bad">O(E)</td><td class="bad">O(E)</td><td>Kruskal, Bellman–Ford, input format</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Build an adjacency list from an edge list</h3>
+      <p>Interview inputs usually arrive as <code>n</code> and a list of edges <code>[u, v]</code> (or <code>[u, v, w]</code>). Converting is step one.</p>
+      <div class="code" data-code>
+<pre data-lang="cpp"><code>// n vertices labelled 0..n-1, edges = {{u, v}, ...}
+vector&lt;vector&lt;int&gt;&gt; adj(n);
+for (auto&amp; e : edges) {
+    adj[e[0]].push_back(e[1]);
+    adj[e[1]].push_back(e[0]);          // omit for a directed graph
+}
+
+// weighted: store (neighbour, weight) pairs
+vector&lt;vector&lt;pair&lt;int, int&gt;&gt;&gt; wadj(n);
+for (auto&amp; e : wedges) wadj[e[0]].push_back({e[1], e[2]});</code></pre>
+<pre data-lang="java"><code>// n vertices labelled 0..n-1, edges = {{u, v}, ...}
+List&lt;List&lt;Integer&gt;&gt; adj = new ArrayList&lt;&gt;();
+for (int i = 0; i &lt; n; i++) adj.add(new ArrayList&lt;&gt;());
+for (int[] e : edges) {
+    adj.get(e[0]).add(e[1]);
+    adj.get(e[1]).add(e[0]);            // omit for a directed graph
+}
+
+// weighted: store {neighbour, weight} pairs
+List&lt;List&lt;int[]&gt;&gt; wadj = new ArrayList&lt;&gt;();
+for (int i = 0; i &lt; n; i++) wadj.add(new ArrayList&lt;&gt;());
+for (int[] e : wedges) wadj.get(e[0]).add(new int[]{e[1], e[2]});</code></pre>
+<pre data-lang="js"><code>// n vertices labelled 0..n-1, edges = [[u, v], ...]
+const adj = Array.from({ length: n }, () =&gt; []);
+for (const [u, v] of edges) {
+    adj[u].push(v);
+    adj[v].push(u);                     // omit for a directed graph
+}
+
+// weighted: store [neighbour, weight] pairs
+const wadj = Array.from({ length: n }, () =&gt; []);
+for (const [u, v, w] of wedges) wadj[u].push([v, w]);</code></pre>
+      </div>
+    </section>
+
+    <!-- TRAVERSALS -->
+    <section id="traversals" class="section">
+      <h2><span class="num">03</span> BFS &amp; DFS</h2>
+      <p class="lead small-lead">Both visit every reachable vertex once in <strong>O(V + E)</strong>. The difference is the order:
+        BFS goes out in rings (queue), DFS goes deep first (stack / recursion). <strong>Always mark visited</strong> — unlike trees, graphs have cycles.</p>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>BFS — shortest path in an unweighted graph</h3>
+          <p>Mark a vertex visited when you <em>enqueue</em> it (not when you dequeue it), or it can be added many times.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;int&gt; bfs(vector&lt;vector&lt;int&gt;&gt;&amp; adj, int src) {
+    vector&lt;int&gt; dist(adj.size(), -1);       // -1 = not visited
+    queue&lt;int&gt; q;
+    dist[src] = 0; q.push(src);
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u])
+            if (dist[v] == -1) { dist[v] = dist[u] + 1; q.push(v); }
+    }
+    return dist;                            // fewest edges from src
+}</code></pre>
+<pre data-lang="java"><code>int[] bfs(List&lt;List&lt;Integer&gt;&gt; adj, int src) {
+    int[] dist = new int[adj.size()];
+    Arrays.fill(dist, -1);                  // -1 = not visited
+    Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+    dist[src] = 0; q.offer(src);
+    while (!q.isEmpty()) {
+        int u = q.poll();
+        for (int v : adj.get(u))
+            if (dist[v] == -1) { dist[v] = dist[u] + 1; q.offer(v); }
+    }
+    return dist;                            // fewest edges from src
+}</code></pre>
+<pre data-lang="js"><code>function bfs(adj, src) {
+    const dist = new Array(adj.length).fill(-1);   // -1 = not visited
+    const q = [src];
+    dist[src] = 0;
+    for (let head = 0; head &lt; q.length; head++) {  // head index: no shift()
+        const u = q[head];
+        for (const v of adj[u])
+            if (dist[v] === -1) { dist[v] = dist[u] + 1; q.push(v); }
+    }
+    return dist;                                   // fewest edges from src
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>DFS — explore, count components, detect cycles</h3>
+          <p>Recursive DFS is short; for very deep graphs use an explicit stack to avoid stack overflow.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>void dfs(vector&lt;vector&lt;int&gt;&gt;&amp; adj, int u, vector&lt;bool&gt;&amp; seen) {
+    seen[u] = true;
+    for (int v : adj[u])
+        if (!seen[v]) dfs(adj, v, seen);
+}
+int countComponents(vector&lt;vector&lt;int&gt;&gt;&amp; adj) {
+    vector&lt;bool&gt; seen(adj.size(), false);
+    int comps = 0;
+    for (int u = 0; u &lt; adj.size(); u++)
+        if (!seen[u]) { comps++; dfs(adj, u, seen); }
+    return comps;
+}</code></pre>
+<pre data-lang="java"><code>void dfs(List&lt;List&lt;Integer&gt;&gt; adj, int u, boolean[] seen) {
+    seen[u] = true;
+    for (int v : adj.get(u))
+        if (!seen[v]) dfs(adj, v, seen);
+}
+int countComponents(List&lt;List&lt;Integer&gt;&gt; adj) {
+    boolean[] seen = new boolean[adj.size()];
+    int comps = 0;
+    for (int u = 0; u &lt; adj.size(); u++)
+        if (!seen[u]) { comps++; dfs(adj, u, seen); }
+    return comps;
+}</code></pre>
+<pre data-lang="js"><code>function countComponents(adj) {
+    const seen = new Array(adj.length).fill(false);
+    let comps = 0;
+    for (let s = 0; s &lt; adj.length; s++) {
+        if (seen[s]) continue;
+        comps++;
+        const stack = [s];                  // iterative DFS
+        seen[s] = true;
+        while (stack.length) {
+            const u = stack.pop();
+            for (const v of adj[u])
+                if (!seen[v]) { seen[v] = true; stack.push(v); }
+        }
+    }
+    return comps;
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ALGORITHMS -->
+    <section id="algorithms" class="section">
+      <h2><span class="num">04</span> The classic algorithms</h2>
+
+      <div class="pattern-list">
+        <article class="card pattern">
+          <h3>Topological sort (Kahn’s algorithm)</h3>
+          <p>Order a DAG so every edge points forward. Repeatedly take a vertex with in-degree 0. If some vertices are never taken, there’s a <strong>cycle</strong>.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;int&gt; topoSort(int n, vector&lt;vector&lt;int&gt;&gt;&amp; adj) {   // directed
+    vector&lt;int&gt; indeg(n, 0), order;
+    for (int u = 0; u &lt; n; u++) for (int v : adj[u]) indeg[v]++;
+    queue&lt;int&gt; q;
+    for (int u = 0; u &lt; n; u++) if (indeg[u] == 0) q.push(u);
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        order.push_back(u);
+        for (int v : adj[u]) if (--indeg[v] == 0) q.push(v);
+    }
+    return order.size() == n ? order : vector&lt;int&gt;{};   // empty = cycle
+}</code></pre>
+<pre data-lang="java"><code>int[] topoSort(int n, List&lt;List&lt;Integer&gt;&gt; adj) {      // directed
+    int[] indeg = new int[n], order = new int[n];
+    for (int u = 0; u &lt; n; u++) for (int v : adj.get(u)) indeg[v]++;
+    Queue&lt;Integer&gt; q = new ArrayDeque&lt;&gt;();
+    for (int u = 0; u &lt; n; u++) if (indeg[u] == 0) q.offer(u);
+    int k = 0;
+    while (!q.isEmpty()) {
+        int u = q.poll();
+        order[k++] = u;
+        for (int v : adj.get(u)) if (--indeg[v] == 0) q.offer(v);
+    }
+    return k == n ? order : new int[0];                // empty = cycle
+}</code></pre>
+<pre data-lang="js"><code>function topoSort(n, adj) {                            // directed
+    const indeg = new Array(n).fill(0), order = [];
+    for (let u = 0; u &lt; n; u++) for (const v of adj[u]) indeg[v]++;
+    const q = [];
+    for (let u = 0; u &lt; n; u++) if (indeg[u] === 0) q.push(u);
+    for (let head = 0; head &lt; q.length; head++) {
+        const u = q[head];
+        order.push(u);
+        for (const v of adj[u]) if (--indeg[v] === 0) q.push(v);
+    }
+    return order.length === n ? order : [];            // empty = cycle
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Dijkstra — shortest paths with non-negative weights</h3>
+          <p>Always settle the closest unsettled vertex (min-heap), then relax its edges. Skip stale heap entries. O((V + E) log V).</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>vector&lt;long long&gt; dijkstra(vector&lt;vector&lt;pair&lt;int,int&gt;&gt;&gt;&amp; adj, int src) {
+    vector&lt;long long&gt; dist(adj.size(), LLONG_MAX);
+    priority_queue&lt;pair&lt;long long,int&gt;, vector&lt;pair&lt;long long,int&gt;&gt;, greater&lt;&gt;&gt; pq;
+    dist[src] = 0; pq.push({0, src});
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d &gt; dist[u]) continue;                 // stale entry
+        for (auto [v, w] : adj[u])
+            if (d + w &lt; dist[v]) { dist[v] = d + w; pq.push({dist[v], v}); }
+    }
+    return dist;
+}</code></pre>
+<pre data-lang="java"><code>long[] dijkstra(List&lt;List&lt;int[]&gt;&gt; adj, int src) {
+    long[] dist = new long[adj.size()];
+    Arrays.fill(dist, Long.MAX_VALUE);
+    PriorityQueue&lt;long[]&gt; pq = new PriorityQueue&lt;&gt;((a, b) -&gt; Long.compare(a[0], b[0]));
+    dist[src] = 0; pq.add(new long[]{0, src});
+    while (!pq.isEmpty()) {
+        long[] top = pq.poll();
+        long d = top[0]; int u = (int) top[1];
+        if (d &gt; dist[u]) continue;                 // stale entry
+        for (int[] e : adj.get(u))
+            if (d + e[1] &lt; dist[e[0]]) { dist[e[0]] = d + e[1]; pq.add(new long[]{dist[e[0]], e[0]}); }
+    }
+    return dist;
+}</code></pre>
+<pre data-lang="js"><code>// JS has no built-in heap: a tiny binary heap of [dist, node] pairs
+class PQ {
+    constructor() { this.a = []; }
+    get size() { return this.a.length; }
+    push(x) {
+        const a = this.a; a.push(x);
+        for (let i = a.length - 1, p; i &gt; 0 &amp;&amp; a[p = (i - 1) &gt;&gt; 1][0] &gt; a[i][0]; i = p) [a[p], a[i]] = [a[i], a[p]];
+    }
+    pop() {
+        const a = this.a, top = a[0], last = a.pop();
+        if (a.length) {
+            a[0] = last;
+            for (let i = 0; ; ) {
+                const l = 2 * i + 1, r = l + 1;
+                let m = i;
+                if (l &lt; a.length &amp;&amp; a[l][0] &lt; a[m][0]) m = l;
+                if (r &lt; a.length &amp;&amp; a[r][0] &lt; a[m][0]) m = r;
+                if (m === i) break;
+                [a[m], a[i]] = [a[i], a[m]]; i = m;
+            }
+        }
+        return top;
+    }
+}
+function dijkstra(adj, src) {                      // adj[u] = [[v, w], ...]
+    const dist = new Array(adj.length).fill(Infinity), pq = new PQ();
+    dist[src] = 0; pq.push([0, src]);
+    while (pq.size) {
+        const [d, u] = pq.pop();
+        if (d &gt; dist[u]) continue;                 // stale entry
+        for (const [v, w] of adj[u])
+            if (d + w &lt; dist[v]) { dist[v] = d + w; pq.push([dist[v], v]); }
+    }
+    return dist;
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Union-Find (Disjoint Set Union)</h3>
+          <p>Merge groups and ask “same group?” in almost O(1). With <strong>path compression</strong> + <strong>union by size</strong>.
+            Used for connectivity, cycle detection in undirected graphs, and Kruskal’s MST.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>struct DSU {
+    vector&lt;int&gt; parent, sz;
+    DSU(int n) : parent(n), sz(n, 1) { iota(parent.begin(), parent.end(), 0); }
+    int find(int x) { return parent[x] == x ? x : parent[x] = find(parent[x]); }
+    bool unite(int a, int b) {
+        a = find(a); b = find(b);
+        if (a == b) return false;                 // already connected
+        if (sz[a] &lt; sz[b]) swap(a, b);
+        parent[b] = a; sz[a] += sz[b];
+        return true;
+    }
+};</code></pre>
+<pre data-lang="java"><code>class DSU {
+    int[] parent, sz;
+    DSU(int n) {
+        parent = new int[n]; sz = new int[n];
+        for (int i = 0; i &lt; n; i++) { parent[i] = i; sz[i] = 1; }
+    }
+    int find(int x) { return parent[x] == x ? x : (parent[x] = find(parent[x])); }
+    boolean unite(int a, int b) {
+        a = find(a); b = find(b);
+        if (a == b) return false;                 // already connected
+        if (sz[a] &lt; sz[b]) { int t = a; a = b; b = t; }
+        parent[b] = a; sz[a] += sz[b];
+        return true;
+    }
+}</code></pre>
+<pre data-lang="js"><code>class DSU {
+    constructor(n) {
+        this.parent = Array.from({ length: n }, (_, i) =&gt; i);
+        this.sz = new Array(n).fill(1);
+    }
+    find(x) {
+        while (this.parent[x] !== x) {
+            this.parent[x] = this.parent[this.parent[x]];   // path halving
+            x = this.parent[x];
+        }
+        return x;
+    }
+    unite(a, b) {
+        a = this.find(a); b = this.find(b);
+        if (a === b) return false;                // already connected
+        if (this.sz[a] &lt; this.sz[b]) [a, b] = [b, a];
+        this.parent[b] = a; this.sz[a] += this.sz[b];
+        return true;
+    }
+}</code></pre>
+          </div>
+        </article>
+
+        <article class="card pattern">
+          <h3>Cycle detection in a directed graph (3 colours)</h3>
+          <p>White = unvisited, grey = on the current DFS path, black = finished. Reaching a <strong>grey</strong> vertex means a back edge → cycle.</p>
+          <div class="code" data-code>
+<pre data-lang="cpp"><code>bool hasCycle(int u, vector&lt;vector&lt;int&gt;&gt;&amp; adj, vector&lt;int&gt;&amp; color) {  // 0 white, 1 grey, 2 black
+    color[u] = 1;
+    for (int v : adj[u]) {
+        if (color[v] == 1) return true;                     // back edge
+        if (color[v] == 0 &amp;&amp; hasCycle(v, adj, color)) return true;
+    }
+    color[u] = 2;
+    return false;
+}</code></pre>
+<pre data-lang="java"><code>boolean hasCycle(int u, List&lt;List&lt;Integer&gt;&gt; adj, int[] color) {  // 0 white, 1 grey, 2 black
+    color[u] = 1;
+    for (int v : adj.get(u)) {
+        if (color[v] == 1) return true;                     // back edge
+        if (color[v] == 0 &amp;&amp; hasCycle(v, adj, color)) return true;
+    }
+    color[u] = 2;
+    return false;
+}</code></pre>
+<pre data-lang="js"><code>function hasCycle(u, adj, color) {                // 0 white, 1 grey, 2 black
+    color[u] = 1;
+    for (const v of adj[u]) {
+        if (color[v] === 1) return true;          // back edge
+        if (color[v] === 0 &amp;&amp; hasCycle(v, adj, color)) return true;
+    }
+    color[u] = 2;
+    return false;
+}</code></pre>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- VISUALIZERS -->
+    <section id="visualizer" class="section">
+      <h2><span class="num">05</span> Interactive visualizers</h2>
+
+      <h3 class="sub">A · BFS, DFS and Dijkstra on the same graph</h3>
+      <div class="viz card">
+        <div class="viz-buttons" id="gAlgoButtons">
+          <button data-galgo="bfs" class="active">BFS</button>
+          <button data-galgo="dfs">DFS</button>
+          <button data-galgo="dijkstra">Dijkstra</button>
+          <span class="divider"></span>
+          <label class="inline-ctl left">Start
+            <select id="gStart"></select>
+          </label>
+          <label class="inline-ctl">Speed
+            <select id="gSpeed">
+              <option value="1200">Slow</option>
+              <option value="750" selected>Normal</option>
+              <option value="300">Fast</option>
+            </select>
+          </label>
+        </div>
+        <svg class="graph-svg big" id="gSvg" viewBox="0 0 640 320"></svg>
+        <div class="g-ds"><span class="g-ds-label" id="gDsLabel">queue</span><span class="g-ds-items" id="gDs">—</span></div>
+        <div class="bs-status" id="gStatus">Pick an algorithm. BFS and DFS ignore the weights; Dijkstra uses them.</div>
+        <div id="gTable"></div>
+      </div>
+
+      <h3 class="sub">B · Topological sort (Kahn’s algorithm)</h3>
+      <p>Tasks with prerequisites: an arrow X → Y means “X must come before Y”. Numbers show each vertex’s current in-degree.</p>
+      <div class="viz card">
+        <div class="viz-buttons">
+          <button id="topoRun" class="active">Run ▶</button>
+          <label class="check-label"><input type="checkbox" id="topoCycle"> add edge G → B (creates a cycle)</label>
+        </div>
+        <svg class="graph-svg big" id="topoSvg" viewBox="0 0 640 350"></svg>
+        <div class="g-ds"><span class="g-ds-label">queue</span><span class="g-ds-items" id="topoQ">—</span></div>
+        <div class="g-ds"><span class="g-ds-label">order</span><span class="g-ds-items" id="topoOut">—</span></div>
+        <div class="bs-status" id="topoStatus">Press Run.</div>
+      </div>
+    </section>
+
+    <!-- CHOOSE -->
+    <section id="choose" class="section">
+      <h2><span class="num">06</span> Which algorithm when?</h2>
+      <div class="card table-card">
+        <table class="cmp-table">
+          <thead><tr><th>The question asks for…</th><th>Use</th><th>Time</th></tr></thead>
+          <tbody>
+            <tr><td>Can I reach X? Count components / islands</td><td><strong>DFS or BFS</strong> (or Union-Find)</td><td>O(V + E)</td></tr>
+            <tr><td>Fewest steps / edges (unweighted)</td><td><strong>BFS</strong></td><td>O(V + E)</td></tr>
+            <tr><td>Cheapest path, weights ≥ 0</td><td><strong>Dijkstra</strong></td><td>O((V + E) log V)</td></tr>
+            <tr><td>Cheapest path with negative weights / at most k edges</td><td><strong>Bellman–Ford</strong></td><td>O(V · E) / O(k · E)</td></tr>
+            <tr><td>Shortest paths between all pairs (small V)</td><td><strong>Floyd–Warshall</strong></td><td>O(V³)</td></tr>
+            <tr><td>Order with prerequisites / detect a cycle in a DAG</td><td><strong>Topological sort</strong> (Kahn or DFS)</td><td>O(V + E)</td></tr>
+            <tr><td>Connect everything at minimum total cost</td><td><strong>MST</strong>: Kruskal (DSU) or Prim (heap)</td><td>O(E log E)</td></tr>
+            <tr><td>Merge groups dynamically, “are these connected?”</td><td><strong>Union-Find</strong></td><td>≈ O(1) per op</td></tr>
+            <tr><td>Split into two groups with no conflicts</td><td><strong>Bipartite check</strong> (BFS/DFS 2-colouring)</td><td>O(V + E)</td></tr>
+            <tr><td>Edges whose removal disconnects the graph</td><td><strong>Tarjan</strong> (bridges / articulation points)</td><td>O(V + E)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TIPS -->
+    <section id="tips" class="section">
+      <h2><span class="num">07</span> Tips &amp; tricks to learn it properly</h2>
+
+      <div class="tips">
+        <div class="tip card"><div class="tip-ico">🔎</div><h3>Find the hidden graph</h3>
+          <p>Ask: what are the vertices (cells, words, courses, states)? What makes an edge? Once named, pick an algorithm from the table.</p></div>
+        <div class="tip card"><div class="tip-ico">✅</div><h3>Mark visited on push</h3>
+          <p>In BFS, mark when you enqueue. Marking when you dequeue lets the same vertex enter the queue many times.</p></div>
+        <div class="tip card"><div class="tip-ico">🧱</div><h3>Build the adjacency list first</h3>
+          <p>Convert edge lists into <code>adj</code> before anything else, and decide directed vs undirected out loud.</p></div>
+        <div class="tip card"><div class="tip-ico">🌊</div><h3>Multi-source BFS</h3>
+          <p>“Distance to the nearest X” for every cell → push <em>all</em> X into the queue at the start (rotting oranges, 01-matrix).</p></div>
+        <div class="tip card"><div class="tip-ico">🔁</div><h3>Reverse the problem</h3>
+          <p>“Which cells can reach the ocean?” → BFS <em>from</em> the ocean. Surrounded regions → flood from the border.</p></div>
+        <div class="tip card"><div class="tip-ico">📦</div><h3>State = vertex</h3>
+          <p>If the answer depends on more than position (keys held, stops used), put that into the visited key: (node, stops).</p></div>
+        <div class="tip card"><div class="tip-ico">⚖️</div><h3>Weights decide the tool</h3>
+          <p>All weights equal → BFS. Non-negative → Dijkstra. Negative → Bellman–Ford. 0/1 weights → deque BFS.</p></div>
+        <div class="tip card"><div class="tip-ico">🎨</div><h3>Colours for directed cycles</h3>
+          <p>Undirected cycle: visited neighbour that isn’t your parent. Directed cycle: grey (on-stack) neighbour.</p></div>
+        <div class="tip card"><div class="tip-ico">🤝</div><h3>Union-Find for “connect &amp; ask”</h3>
+          <p>Edges arrive one by one and you query connectivity? DSU beats re-running DFS each time.</p></div>
+        <div class="tip card"><div class="tip-ico">🧮</div><h3>Know your bounds</h3>
+          <p>V ≤ 400 → O(V³) is fine. V up to 10⁵ → O(V + E) or O(E log V) only. Let constraints pick the algorithm.</p></div>
+        <div class="tip card"><div class="tip-ico">📚</div><h3>Recursion depth</h3>
+          <p>A path of 10⁵ vertices overflows recursive DFS in Java/JS. Use an explicit stack or BFS when graphs can be long.</p></div>
+        <div class="tip card"><div class="tip-ico">✏️</div><h3>Draw it small</h3>
+          <p>Sketch 5–6 vertices including a cycle and a disconnected piece. Trace visited/queue by hand once.</p></div>
+      </div>
+
+      <div class="grid-2 mt">
+        <div class="card">
+          <h3>Common mistakes checklist</h3>
+          <ul class="crosses">
+            <li>No visited set → infinite loop on cycles.</li>
+            <li>Forgetting the reverse edge for undirected graphs.</li>
+            <li>Only exploring from vertex 0 when the graph is disconnected.</li>
+            <li>Using DFS for shortest paths (it doesn’t give them).</li>
+            <li>Dijkstra with negative weights, or without skipping stale heap entries.</li>
+            <li><code>array.shift()</code> in a JS BFS → O(V²).</li>
+            <li>Mixing 0-based and 1-based vertex labels from the input.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>A 10-day practice plan</h3>
+          <ol class="plan">
+            <li><strong>Day 1:</strong> build adjacency lists; BFS and DFS; path exists, town judge, star graph.</li>
+            <li><strong>Day 2:</strong> number of provinces, keys and rooms, max area of island.</li>
+            <li><strong>Day 3:</strong> clone graph, bipartite check.</li>
+            <li><strong>Day 4:</strong> surrounded regions, Pacific Atlantic (reverse BFS).</li>
+            <li><strong>Day 5:</strong> shortest path in binary matrix, word ladder.</li>
+            <li><strong>Day 6:</strong> course schedule I &amp; II (topological sort).</li>
+            <li><strong>Day 7:</strong> Union-Find: redundant connection; min cost to connect points (MST).</li>
+            <li><strong>Day 8:</strong> Dijkstra: network delay time.</li>
+            <li><strong>Day 9:</strong> cheapest flights within k stops (Bellman–Ford), bus routes.</li>
+            <li><strong>Day 10:</strong> critical connections (Tarjan); redo mistakes.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTIONS -->
+    <section id="questions" class="section">
+      <h2><span class="num">08</span> Important questions</h2>
+      <p class="lead small-lead">Tick questions off as you solve them — progress is saved in your browser. Try each one before opening the hint, and open the hint before the solution.</p>
+
+      <div class="q-toolbar">
+        <div class="filters" role="group" aria-label="Filter by difficulty">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="easy">Easy</button>
+          <button class="chip" data-filter="medium">Medium</button>
+          <button class="chip" data-filter="hard">Hard</button>
+        </div>
+        <div class="progress">
+          <div class="progress-bar"><span id="progressFill"></span></div>
+          <span id="progressText">0 / 0 solved</span>
+        </div>
+      </div>
+
+      <div id="questionList" class="q-list"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="num">09</span> Quick quiz</h2>
+      <p class="lead small-lead">Check your understanding — answers explain the why.</p>
+      <div id="quizBox" class="quiz"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Built for learning · Name the vertices and edges, mark visited, and let the weights choose the algorithm.</p>
+  </footer>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

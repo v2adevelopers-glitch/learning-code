@@ -24,6 +24,9 @@ Interactive learning guides for data structures & algorithms. Start at [`index.h
 - [Trees](trees/index.html) — terminology, binary tree types, pre/in/post/level-order traversals,
   binary search trees (search, insert, delete), recursion patterns, a traversal animator and a BST
   playground, tips & tricks, 20 important questions and a quiz.
+- [Graphs](graphs/index.html) — terminology, adjacency list/matrix/edge list, BFS and DFS, topological
+  sort, Dijkstra, Union-Find, directed cycle detection, a "which algorithm when" table, BFS/DFS/Dijkstra
+  and topological-sort visualizers, tips & tricks, 20 important questions and a quiz.
 
 Every question has a hint, the approach, complexity, and solutions in C++ / Java / JavaScript;
 solved questions are tracked in your browser.
